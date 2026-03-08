@@ -20,8 +20,8 @@ export default function History() {
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({
-    year: year ? parseInt(year) : undefined,
-    category: category as Category | "",
+    year: year && year !== "all" ? parseInt(year) : undefined,
+    category: category && category !== "all" ? (category as Category) : "",
   });
 
   return (

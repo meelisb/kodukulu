@@ -23,7 +23,7 @@ export default function Summary() {
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({
-    year: year ? parseInt(year) : undefined,
+    year: year && year !== "all" ? parseInt(year) : undefined,
   });
 
   const totals = CATEGORIES.reduce(

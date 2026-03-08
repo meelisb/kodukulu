@@ -113,10 +113,19 @@ export default function History() {
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-base font-semibold text-foreground">
-                    {expense.vendor}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-semibold text-foreground">
+                      {expense.vendor}
+                    </p>
+                    <button
+                      onClick={() => setEditingExpense(expense)}
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                      aria-label="Muuda"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-0.5">
                     {format(new Date(expense.date), "dd.MM.yyyy", {
                       locale: et,
                     })}

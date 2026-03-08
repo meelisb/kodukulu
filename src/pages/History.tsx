@@ -152,6 +152,21 @@ export default function History() {
           ))}
         </div>
       )}
+
+      <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
+        <DialogContent className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Muuda kulu</DialogTitle>
+          </DialogHeader>
+          {editingExpense && (
+            <ExpenseForm
+              initialData={editingExpense}
+              onSubmit={handleUpdate}
+              isSubmitting={updateExpense.isPending}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

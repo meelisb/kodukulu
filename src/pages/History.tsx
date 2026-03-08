@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
-import { Download } from "lucide-react";
+import { Download, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,19 +10,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import CategoryBadge from "@/components/CategoryBadge";
-import { useExpenses, useExpenseYears, exportToCSV } from "@/hooks/useExpenses";
-import { CATEGORIES, type Category } from "@/types/expense";
+import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense } from "@/hooks/useExpenses";
+import { CATEGORIES, type Category, type Expense } from "@/types/expense";
+import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
+import { toast } from "@/components/ui/sonner";
 
 export default function History() {
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({
     year: year && year !== "all" ? parseInt(year) : undefined,
     category: category && category !== "all" ? (category as Category) : "",
   });
+
+  const updateExpense = useUpdateExpense();
+
+  const handleUpdate = (data: ExpenseFormData) => {
+    if (!editingExpense) return;
+    updateExpense.mutate(
+      { id: editingExpense.id, ...data },
+      {
+        onSuccess: () => {
+          toast.success("Kulu muudetud!");
+          setEditingExpense(null);
+        },
+        onError: () => {
+          toast.error("Viga muutmisel");
+        },
+      }
+    );
+  };
 
   return (
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
@@ -86,10 +113,19 @@ export default function History() {
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-base font-semibold text-foreground">
-                    {expense.vendor}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-semibold text-foreground">
+                      {expense.vendor}
+                    </p>
+                    <button
+                      onClick={() => setEditingExpense(expense)}
+                      className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                      aria-label="Muuda"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-0.5">
                     {format(new Date(expense.date), "dd.MM.yyyy", {
                       locale: et,
                     })}
@@ -116,6 +152,21 @@ export default function History() {
           ))}
         </div>
       )}
+
+      <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
+        <DialogContent className="max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Muuda kulu</DialogTitle>
+          </DialogHeader>
+          {editingExpense && (
+            <ExpenseForm
+              initialData={editingExpense}
+              onSubmit={handleUpdate}
+              isSubmitting={updateExpense.isPending}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

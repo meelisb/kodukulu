@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, type Expense } from "@/types/expense";
+import { AutocompleteInput } from "@/components/AutocompleteInput";
+import { useVendorSuggestions, useDescriptionSuggestions } from "@/hooks/useAutocompleteSuggestions";
 
 export interface ExpenseFormData {
   date: string;
@@ -44,6 +46,9 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
   const [category, setCategory] = useState(initialData?.category || "");
   const [amount, setAmount] = useState(initialData?.amount?.toString().replace(".", ",") || "");
   const [fuelQuantity, setFuelQuantity] = useState(initialData?.fuel_quantity?.toString().replace(".", ",") || "");
+
+  const { data: vendorSuggestions = [] } = useVendorSuggestions();
+  const { data: descriptionSuggestions = [] } = useDescriptionSuggestions();
 
   useEffect(() => {
     if (initialData) {
@@ -115,21 +120,23 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
 
       <div className="space-y-2">
         <Label className="text-base font-semibold">Saaja *</Label>
-        <Input
+        <AutocompleteInput
           value={vendor}
-          onChange={(e) => setVendor(e.target.value)}
+          onChange={setVendor}
+          suggestions={vendorSuggestions}
           placeholder="nt. Bauhaus, Selver..."
-          className="h-12 text-base"
+          emptyText="Soovitusi ei leitud"
         />
       </div>
 
       <div className="space-y-2">
         <Label className="text-base font-semibold">Kirjeldus</Label>
-        <Textarea
+        <AutocompleteInput
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={setDescription}
+          suggestions={descriptionSuggestions}
           placeholder="Valikuline kirjeldus"
-          className="min-h-[80px] text-base"
+          emptyText="Soovitusi ei leitud"
         />
       </div>
 

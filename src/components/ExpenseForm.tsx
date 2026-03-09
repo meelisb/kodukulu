@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
-import { CalendarIcon, Save } from "lucide-react";
+import { CalendarIcon, Save, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -23,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { CATEGORIES, type Expense } from "@/types/expense";
 import { AutocompleteInput } from "@/components/AutocompleteInput";
 import { useVendorSuggestions, useDescriptionSuggestions } from "@/hooks/useAutocompleteSuggestions";
+import { useReceiptParser } from "@/hooks/useReceiptParser";
+import { toast } from "@/components/ui/sonner";
 
 export interface ExpenseFormData {
   date: string;
@@ -47,6 +48,9 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
   const [amount, setAmount] = useState(initialData?.amount?.toString().replace(".", ",") || "");
   const [fuelQuantity, setFuelQuantity] = useState(initialData?.fuel_quantity?.toString().replace(".", ",") || "");
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { parseReceipt, isParsing } = useReceiptParser();
+
   const { data: vendorSuggestions = [] } = useVendorSuggestions();
   const { data: descriptionSuggestions = [] } = useDescriptionSuggestions();
 
@@ -60,6 +64,49 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
       setFuelQuantity(initialData.fuel_quantity?.toString().replace(".", ",") || "");
     }
   }, [initialData]);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ["application/pdf", "image/jpeg", "image/png"];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Toetatud on ainult PDF, JPG ja PNG failid");
+      return;
+    }
+
+    toast.info("Kviitungi analüüsimine...");
+    const result = await parseReceipt(file);
+
+    if (result) {
+      if (result.date) {
+        setDate(new Date(result.date));
+      }
+      if (result.vendor) {
+        setVendor(result.vendor);
+      }
+      if (result.description) {
+        setDescription(result.description);
+      }
+      if (result.category && CATEGORIES.includes(result.category as typeof CATEGORIES[number])) {
+        setCategory(result.category);
+      }
+      if (result.amount !== undefined && result.amount !== null) {
+        setAmount(result.amount.toString().replace(".", ","));
+      }
+      if (result.fuel_liters !== undefined && result.fuel_liters !== null) {
+        setFuelQuantity(result.fuel_liters.toString().replace(".", ","));
+      }
+      toast.success("Kviitung analüüsitud! Kontrolli ja täienda andmeid.");
+    } else {
+      toast.error("Kviitungi analüüsimine ebaõnnestus");
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +138,41 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Receipt upload button */}
+      <div className="space-y-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+          onChange={handleFileSelect}
+          className="hidden"
+          disabled={isParsing || isSubmitting}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="h-14 w-full text-lg font-semibold"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isParsing || isSubmitting}
+        >
+          {isParsing ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Analüüsin...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-5 w-5" />
+              Laadi kviitung üles
+            </>
+          )}
+        </Button>
+        <p className="text-sm text-muted-foreground text-center">
+          PDF, JPG või PNG
+        </p>
+      </div>
+
       <div className="space-y-2">
         <Label className="text-base font-semibold">Kuupäev</Label>
         <Popover>

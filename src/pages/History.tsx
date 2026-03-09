@@ -45,6 +45,21 @@ export default function History() {
   });
 
   const updateExpense = useUpdateExpense();
+  const deleteExpense = useDeleteExpense();
+
+  const handleDelete = () => {
+    if (!deletingExpenseId) return;
+    deleteExpense.mutate(deletingExpenseId, {
+      onSuccess: () => {
+        toast.success("Kulu kustutatud!");
+        setDeletingExpenseId(null);
+      },
+      onError: () => {
+        toast.error("Viga kustutamisel");
+        setDeletingExpenseId(null);
+      },
+    });
+  };
 
   const handleUpdate = (data: ExpenseFormData) => {
     if (!editingExpense) return;

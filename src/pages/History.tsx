@@ -199,6 +199,23 @@ export default function History() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deletingExpense} onOpenChange={(open) => !open && setDeletingExpense(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Kas oled kindel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kulu "{deletingExpense?.vendor}" ({deletingExpense?.amount.toFixed(2)} €) kustutatakse jäädavalt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Tühista</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Kustuta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

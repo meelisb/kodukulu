@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
-import { CalendarIcon, Save } from "lucide-react";
+import { CalendarIcon, Save, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -23,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { CATEGORIES, type Expense } from "@/types/expense";
 import { AutocompleteInput } from "@/components/AutocompleteInput";
 import { useVendorSuggestions, useDescriptionSuggestions } from "@/hooks/useAutocompleteSuggestions";
+import { useReceiptParser } from "@/hooks/useReceiptParser";
+import { toast } from "@/components/ui/sonner";
 
 export interface ExpenseFormData {
   date: string;

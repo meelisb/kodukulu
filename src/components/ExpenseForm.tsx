@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { CATEGORIES, type Expense } from "@/types/expense";
+import { AutocompleteInput } from "@/components/AutocompleteInput";
+import { useVendorSuggestions, useDescriptionSuggestions } from "@/hooks/useAutocompleteSuggestions";
 
 export interface ExpenseFormData {
   date: string;

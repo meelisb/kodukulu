@@ -145,10 +145,17 @@ export default function History() {
                     </p>
                     <button
                       onClick={() => setEditingExpense(expense)}
-                      className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-2"
                       aria-label="Muuda"
                     >
                       <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingExpenseId(expense.id)}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-2 ml-2"
+                      aria-label="Kustuta"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">

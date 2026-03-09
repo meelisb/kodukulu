@@ -36,6 +36,7 @@ export default function History() {
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({
@@ -44,6 +45,20 @@ export default function History() {
   });
 
   const updateExpense = useUpdateExpense();
+  const deleteExpense = useDeleteExpense();
+
+  const handleDelete = () => {
+    if (!deletingExpense) return;
+    deleteExpense.mutate(deletingExpense.id, {
+      onSuccess: () => {
+        toast.success("Kulu kustutatud!");
+        setDeletingExpense(null);
+      },
+      onError: () => {
+        toast.error("Viga kustutamisel");
+      },
+    });
+  };
 
   const handleUpdate = (data: ExpenseFormData) => {
     if (!editingExpense) return;

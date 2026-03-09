@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
-import { Download, Pencil } from "lucide-react";
+import { Download, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,

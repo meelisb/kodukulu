@@ -47,6 +47,9 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
   const [amount, setAmount] = useState(initialData?.amount?.toString().replace(".", ",") || "");
   const [fuelQuantity, setFuelQuantity] = useState(initialData?.fuel_quantity?.toString().replace(".", ",") || "");
 
+  const { data: vendorSuggestions = [] } = useVendorSuggestions();
+  const { data: descriptionSuggestions = [] } = useDescriptionSuggestions();
+
   useEffect(() => {
     if (initialData) {
       setDate(new Date(initialData.date));

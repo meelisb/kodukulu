@@ -138,6 +138,41 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Receipt upload button */}
+      <div className="space-y-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+          onChange={handleFileSelect}
+          className="hidden"
+          disabled={isParsing || isSubmitting}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="h-14 w-full text-lg font-semibold"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isParsing || isSubmitting}
+        >
+          {isParsing ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Analüüsin...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-5 w-5" />
+              Laadi kviitung üles
+            </>
+          )}
+        </Button>
+        <p className="text-sm text-muted-foreground text-center">
+          PDF, JPG või PNG
+        </p>
+      </div>
+
       <div className="space-y-2">
         <Label className="text-base font-semibold">Kuupäev</Label>
         <Popover>

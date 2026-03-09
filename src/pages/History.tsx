@@ -27,7 +27,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import CategoryBadge from "@/components/CategoryBadge";
-import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense } from "@/hooks/useExpenses";
+import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense, useDeleteExpense } from "@/hooks/useExpenses";
 import { CATEGORIES, type Category, type Expense } from "@/types/expense";
 import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";

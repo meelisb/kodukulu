@@ -149,6 +149,13 @@ export default function History() {
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
+                    <button
+                      onClick={() => setDeletingExpense(expense)}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                      aria-label="Kustuta"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {format(new Date(expense.date), "dd.MM.yyyy", {

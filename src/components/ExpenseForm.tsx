@@ -131,11 +131,12 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
 
       <div className="space-y-2">
         <Label className="text-base font-semibold">Kirjeldus</Label>
-        <Textarea
+        <AutocompleteInput
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={setDescription}
+          suggestions={descriptionSuggestions}
           placeholder="Valikuline kirjeldus"
-          className="min-h-[80px] text-base"
+          emptyText="Soovitusi ei leitud"
         />
       </div>
 

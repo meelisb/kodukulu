@@ -16,6 +16,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import CategoryBadge from "@/components/CategoryBadge";
 import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense } from "@/hooks/useExpenses";
 import { CATEGORIES, type Category, type Expense } from "@/types/expense";

@@ -11,9 +11,9 @@ serve(async (req) => {
   }
 
   try {
-    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error("ANTHROPIC_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     const { fileBase64, mimeType } = await req.json();
@@ -22,31 +22,26 @@ serve(async (req) => {
       throw new Error("Missing fileBase64 or mimeType");
     }
 
-    const prompt = `Extract the following fields from this receipt and return only JSON: date (YYYY-MM-DD), vendor (store/station name), description (product or service), amount (total paid as number), fuel_liters (liters as number, null if not applicable), category (use 'Auto' if fuel/car wash/windshield fluid, otherwise null)`;
+    const prompt = `Extract the following fields from this receipt and return ONLY valid JSON (no markdown, no code blocks): {"date": "YYYY-MM-DD", "vendor": "store/station name", "description": "product or service", "amount": total_paid_as_number, "fuel_liters": liters_as_number_or_null, "category": "Auto" if fuel/car wash/windshield fluid otherwise null}`;
 
-    const mediaType = mimeType === "application/pdf" ? "application/pdf" : mimeType;
+    const imageUrl = `data:${mimeType};base64,${fileBase64}`;
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "google/gemini-2.5-flash",
         max_tokens: 1024,
         messages: [
           {
             role: "user",
             content: [
               {
-                type: mediaType === "application/pdf" ? "document" : "image",
-                source: {
-                  type: "base64",
-                  media_type: mediaType,
-                  data: fileBase64,
-                },
+                type: "image_url",
+                image_url: { url: imageUrl },
               },
               {
                 type: "text",
@@ -60,18 +55,18 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Claude API error:", response.status, errorText);
-      throw new Error(`Claude API error: ${response.status}`);
+      console.error("AI Gateway error:", response.status, errorText);
+      throw new Error(`AI Gateway error: ${response.status}`);
     }
 
     const data = await response.json();
-    const textContent = data.content?.find((c: { type: string }) => c.type === "text");
-    const responseText = textContent?.text || "";
+    const responseText = data.choices?.[0]?.message?.content || "";
 
     // Extract JSON from response
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error("Could not parse JSON from Claude response");
+      console.error("Raw response:", responseText);
+      throw new Error("Could not parse JSON from AI response");
     }
 
     const parsedData = JSON.parse(jsonMatch[0]);

@@ -73,6 +73,15 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
     });
   };
 
+  const handleReset = () => {
+    setDate(initialData ? new Date(initialData.date) : new Date());
+    setVendor(initialData?.vendor || "");
+    setDescription(initialData?.description || "");
+    setCategory(initialData?.category || "");
+    setAmount(initialData?.amount?.toString().replace(".", ",") || "");
+    setFuelQuantity(initialData?.fuel_quantity?.toString().replace(".", ",") || "");
+  };
+
   const isFormValid = vendor && category && amount;
 
   return (
@@ -164,15 +173,27 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
         </div>
       )}
 
-      <Button
-        type="submit"
-        size="lg"
-        className="h-14 w-full text-lg font-semibold"
-        disabled={isSubmitting || !isFormValid}
-      >
-        <Save className="mr-2 h-5 w-5" />
-        {isSubmitting ? "Salvestamine..." : "Salvesta"}
-      </Button>
+      <div className="flex gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          className="h-14 flex-1 text-lg font-semibold"
+          onClick={handleReset}
+          disabled={isSubmitting}
+        >
+          Tühista
+        </Button>
+        <Button
+          type="submit"
+          size="lg"
+          className="h-14 flex-1 text-lg font-semibold"
+          disabled={isSubmitting || !isFormValid}
+        >
+          <Save className="mr-2 h-5 w-5" />
+          {isSubmitting ? "Salvestamine..." : "Salvesta"}
+        </Button>
+      </div>
     </form>
   );
 }

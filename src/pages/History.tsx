@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
-import { Download, Pencil } from "lucide-react";
+import { Download, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -16,8 +16,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import CategoryBadge from "@/components/CategoryBadge";
-import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense } from "@/hooks/useExpenses";
+import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense, useDeleteExpense } from "@/hooks/useExpenses";
 import { CATEGORIES, type Category, type Expense } from "@/types/expense";
 import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";
@@ -26,6 +36,7 @@ export default function History() {
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({
@@ -34,6 +45,20 @@ export default function History() {
   });
 
   const updateExpense = useUpdateExpense();
+  const deleteExpense = useDeleteExpense();
+
+  const handleDelete = () => {
+    if (!deletingExpense) return;
+    deleteExpense.mutate(deletingExpense.id, {
+      onSuccess: () => {
+        toast.success("Kulu kustutatud!");
+        setDeletingExpense(null);
+      },
+      onError: () => {
+        toast.error("Viga kustutamisel");
+      },
+    });
+  };
 
   const handleUpdate = (data: ExpenseFormData) => {
     if (!editingExpense) return;
@@ -124,6 +149,13 @@ export default function History() {
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
+                    <button
+                      onClick={() => setDeletingExpense(expense)}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                      aria-label="Kustuta"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {format(new Date(expense.date), "dd.MM.yyyy", {
@@ -167,6 +199,23 @@ export default function History() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deletingExpense} onOpenChange={(open) => !open && setDeletingExpense(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Kas oled kindel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Kulu "{deletingExpense?.vendor}" ({deletingExpense?.amount.toFixed(2)} €) kustutatakse jäädavalt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Tühista</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Kustuta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

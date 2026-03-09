@@ -60,6 +60,21 @@ export function useAddExpense() {
   });
 }
 
+export function useDeleteExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("expenses").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["expense-years"] });
+    },
+  });
+}
+
 export function useUpdateExpense() {
   const queryClient = useQueryClient();
 

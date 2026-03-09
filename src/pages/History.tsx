@@ -36,6 +36,7 @@ export default function History() {
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({

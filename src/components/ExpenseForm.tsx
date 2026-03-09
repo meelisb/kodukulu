@@ -120,11 +120,12 @@ export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseForm
 
       <div className="space-y-2">
         <Label className="text-base font-semibold">Saaja *</Label>
-        <Input
+        <AutocompleteInput
           value={vendor}
-          onChange={(e) => setVendor(e.target.value)}
+          onChange={setVendor}
+          suggestions={vendorSuggestions}
           placeholder="nt. Bauhaus, Selver..."
-          className="h-12 text-base"
+          emptyText="Soovitusi ei leitud"
         />
       </div>
 

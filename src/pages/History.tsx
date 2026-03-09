@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
-import { Download, Pencil } from "lucide-react";
+import { Download, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -16,8 +16,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import CategoryBadge from "@/components/CategoryBadge";
-import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense } from "@/hooks/useExpenses";
+import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense, useDeleteExpense } from "@/hooks/useExpenses";
 import { CATEGORIES, type Category, type Expense } from "@/types/expense";
 import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";
@@ -26,6 +36,7 @@ export default function History() {
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({
@@ -34,6 +45,21 @@ export default function History() {
   });
 
   const updateExpense = useUpdateExpense();
+  const deleteExpense = useDeleteExpense();
+
+  const handleDelete = () => {
+    if (!deletingExpenseId) return;
+    deleteExpense.mutate(deletingExpenseId, {
+      onSuccess: () => {
+        toast.success("Kulu kustutatud!");
+        setDeletingExpenseId(null);
+      },
+      onError: () => {
+        toast.error("Viga kustutamisel");
+        setDeletingExpenseId(null);
+      },
+    });
+  };
 
   const handleUpdate = (data: ExpenseFormData) => {
     if (!editingExpense) return;
@@ -119,10 +145,17 @@ export default function History() {
                     </p>
                     <button
                       onClick={() => setEditingExpense(expense)}
-                      className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                      className="text-muted-foreground hover:text-foreground transition-colors p-2"
                       aria-label="Muuda"
                     >
                       <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingExpenseId(expense.id)}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-2 ml-2"
+                      aria-label="Kustuta"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                   <p className="text-sm text-muted-foreground mt-0.5">
@@ -167,6 +200,26 @@ export default function History() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deletingExpenseId} onOpenChange={(open) => !open && setDeletingExpenseId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Kas oled kindel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              See tegevus on pöördumatu. Kulu kustutatakse jäädavalt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Tühista</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Kustuta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

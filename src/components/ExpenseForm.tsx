@@ -37,8 +37,14 @@ export interface ExpenseFormData {
 interface ExpenseFormProps {
   initialData?: Expense;
   onSubmit: (data: ExpenseFormData) => void;
+  onCancel?: () => void;
   isSubmitting?: boolean;
 }
+
+const toSentenceCase = (str: string): string => {
+  if (!str || str !== str.toUpperCase()) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
 
 export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseFormProps) {
   const [date, setDate] = useState<Date>(initialData ? new Date(initialData.date) : new Date());

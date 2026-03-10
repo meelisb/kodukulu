@@ -89,10 +89,10 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
         setDate(new Date(result.date));
       }
       if (result.vendor) {
-        setVendor(result.vendor);
+        setVendor(toSentenceCase(result.vendor));
       }
       if (result.description) {
-        setDescription(result.description);
+        setDescription(toSentenceCase(result.description));
       }
       if (result.category && CATEGORIES.includes(result.category as typeof CATEGORIES[number])) {
         setCategory(result.category);

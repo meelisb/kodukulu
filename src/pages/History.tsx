@@ -195,6 +195,7 @@ export default function History() {
             <ExpenseForm
               initialData={editingExpense}
               onSubmit={handleUpdate}
+              onCancel={() => setEditingExpense(null)}
               isSubmitting={updateExpense.isPending}
             />
           )}

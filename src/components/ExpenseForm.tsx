@@ -274,7 +274,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
           variant="outline"
           size="lg"
           className="h-14 flex-1 text-lg font-semibold"
-          onClick={handleReset}
+          onClick={onCancel || handleReset}
           disabled={isSubmitting}
         >
           Tühista

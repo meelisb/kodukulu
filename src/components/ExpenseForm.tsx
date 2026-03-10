@@ -46,7 +46,7 @@ const toSentenceCase = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
-export function ExpenseForm({ initialData, onSubmit, isSubmitting }: ExpenseFormProps) {
+export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: ExpenseFormProps) {
   const [date, setDate] = useState<Date>(initialData ? new Date(initialData.date) : new Date());
   const [vendor, setVendor] = useState(initialData?.vendor || "");
   const [description, setDescription] = useState(initialData?.description || "");

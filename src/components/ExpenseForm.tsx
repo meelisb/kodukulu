@@ -69,7 +69,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
 
   useEffect(() => {
     if (initialData) {
-      setDate(new Date(initialData.date));
+      const d = parseDateString(initialData.date);
+      setDate(d);
+      setDateText(format(d, "dd.MM.yyyy"));
       setVendor(initialData.vendor);
       setDescription(initialData.description || "");
       setCategory(initialData.category);

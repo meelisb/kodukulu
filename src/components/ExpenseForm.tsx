@@ -143,7 +143,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
   };
 
   const handleReset = () => {
-    setDate(initialData ? new Date(initialData.date) : new Date());
+    const d = initialData ? parseDateString(initialData.date) : new Date();
+    setDate(d);
+    setDateText(format(d, "dd.MM.yyyy"));
     setVendor(initialData?.vendor || "");
     setDescription(initialData?.description || "");
     setCategory(initialData?.category || "");

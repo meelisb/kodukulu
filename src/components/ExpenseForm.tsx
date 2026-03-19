@@ -46,8 +46,15 @@ const toSentenceCase = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
+const parseDateString = (dateStr: string): Date => {
+  // Parse "YYYY-MM-DD" without timezone shift
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: ExpenseFormProps) {
-  const [date, setDate] = useState<Date>(initialData ? new Date(initialData.date) : new Date());
+  const [date, setDate] = useState<Date>(initialData ? parseDateString(initialData.date) : new Date());
+  const [dateText, setDateText] = useState(format(initialData ? parseDateString(initialData.date) : new Date(), "dd.MM.yyyy"));
   const [vendor, setVendor] = useState(initialData?.vendor || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [category, setCategory] = useState(initialData?.category || "");

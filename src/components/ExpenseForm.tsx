@@ -194,29 +194,45 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
 
       <div className="space-y-2">
         <Label className="text-base font-semibold">Kuupäev</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "h-12 w-full justify-start text-left text-base font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-5 w-5" />
-              {date ? format(date, "dd.MM.yyyy", { locale: et }) : <span>Vali kuupäev</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(d) => d && setDate(d)}
-              initialFocus
-              className="p-3 pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="flex gap-2">
+          <Input
+            value={dateText}
+            onChange={(e) => {
+              setDateText(e.target.value);
+              const parsed = parse(e.target.value, "dd.MM.yyyy", new Date());
+              if (isValid(parsed)) {
+                setDate(parsed);
+              }
+            }}
+            placeholder="pp.kk.aaaa"
+            className="h-12 flex-1 text-base"
+          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 w-12 p-0"
+              >
+                <CalendarIcon className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(d) => {
+                  if (d) {
+                    setDate(d);
+                    setDateText(format(d, "dd.MM.yyyy"));
+                  }
+                }}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       <div className="space-y-2">

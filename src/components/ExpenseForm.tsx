@@ -95,7 +95,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
 
     if (result) {
       if (result.date) {
-        setDate(new Date(result.date));
+        const d = parseDateString(result.date);
+        setDate(d);
+        setDateText(format(d, "dd.MM.yyyy"));
       }
       if (result.vendor) {
         setVendor(toSentenceCase(result.vendor));

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { format } from "date-fns";
+import { format, parse, isValid } from "date-fns";
 import { et } from "date-fns/locale";
 import { CalendarIcon, Save, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,8 +46,15 @@ const toSentenceCase = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
+const parseDateString = (dateStr: string): Date => {
+  // Parse "YYYY-MM-DD" without timezone shift
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
 export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: ExpenseFormProps) {
-  const [date, setDate] = useState<Date>(initialData ? new Date(initialData.date) : new Date());
+  const [date, setDate] = useState<Date>(initialData ? parseDateString(initialData.date) : new Date());
+  const [dateText, setDateText] = useState(format(initialData ? parseDateString(initialData.date) : new Date(), "dd.MM.yyyy"));
   const [vendor, setVendor] = useState(initialData?.vendor || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [category, setCategory] = useState(initialData?.category || "");
@@ -62,7 +69,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
 
   useEffect(() => {
     if (initialData) {
-      setDate(new Date(initialData.date));
+      const d = parseDateString(initialData.date);
+      setDate(d);
+      setDateText(format(d, "dd.MM.yyyy"));
       setVendor(initialData.vendor);
       setDescription(initialData.description || "");
       setCategory(initialData.category);
@@ -86,7 +95,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
 
     if (result) {
       if (result.date) {
-        setDate(new Date(result.date));
+        const d = parseDateString(result.date);
+        setDate(d);
+        setDateText(format(d, "dd.MM.yyyy"));
       }
       if (result.vendor) {
         setVendor(toSentenceCase(result.vendor));
@@ -132,7 +143,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
   };
 
   const handleReset = () => {
-    setDate(initialData ? new Date(initialData.date) : new Date());
+    const d = initialData ? parseDateString(initialData.date) : new Date();
+    setDate(d);
+    setDateText(format(d, "dd.MM.yyyy"));
     setVendor(initialData?.vendor || "");
     setDescription(initialData?.description || "");
     setCategory(initialData?.category || "");
@@ -181,29 +194,45 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
 
       <div className="space-y-2">
         <Label className="text-base font-semibold">Kuupäev</Label>
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "h-12 w-full justify-start text-left text-base font-normal",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-5 w-5" />
-              {date ? format(date, "dd.MM.yyyy", { locale: et }) : <span>Vali kuupäev</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(d) => d && setDate(d)}
-              initialFocus
-              className="p-3 pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
+        <div className="flex gap-2">
+          <Input
+            value={dateText}
+            onChange={(e) => {
+              setDateText(e.target.value);
+              const parsed = parse(e.target.value, "dd.MM.yyyy", new Date());
+              if (isValid(parsed)) {
+                setDate(parsed);
+              }
+            }}
+            placeholder="pp.kk.aaaa"
+            className="h-12 flex-1 text-base"
+          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 w-12 p-0"
+              >
+                <CalendarIcon className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(d) => {
+                  if (d) {
+                    setDate(d);
+                    setDateText(format(d, "dd.MM.yyyy"));
+                  }
+                }}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       <div className="space-y-2">

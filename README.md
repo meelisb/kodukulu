@@ -1,8 +1,10 @@
-# Welcome to your Lovable project
+# Kodukulu - Home Cost Tracker
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+This is built for personal home cost tracking and home management. 
+
+**URL**: https://lovable.dev/projects/8227689b-5cbf-452e-947c-715b893e6823?utm_source=lovable-badge
 
 ## How can I edit this code?
 
@@ -10,7 +12,7 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Simply visit the [Lovable Project](https://lovable.dev/projects/8227689b-5cbf-452e-947c-715b893e6823?utm_source=lovable-badge) and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
 
@@ -62,7 +64,7 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Simply open [Lovable](https://lovable.dev/projects/8227689b-5cbf-452e-947c-715b893e6823?utm_source=lovable-badge) and click on Share -> Publish.
 
 ## Can I connect a custom domain to my Lovable project?
 

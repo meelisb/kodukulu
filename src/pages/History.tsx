@@ -155,6 +155,20 @@ export default function History() {
           </SelectContent>
         </Select>
 
+        <Select value={vendor} onValueChange={setVendor}>
+          <SelectTrigger className="h-11 flex-1 text-base">
+            <SelectValue placeholder="Saaja" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Kõik saajad</SelectItem>
+            {vendors.map((v) => (
+              <SelectItem key={v} value={v}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <Button
           variant="outline"
           size="icon"

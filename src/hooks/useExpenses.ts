@@ -5,6 +5,7 @@ import type { Expense, Category } from "@/types/expense";
 interface ExpenseFilters {
   year?: number;
   category?: Category | "";
+  sortAscending?: boolean;
 }
 
 export function useExpenses(filters: ExpenseFilters = {}) {

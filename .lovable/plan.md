@@ -1,30 +1,35 @@
 
 
-## Plan: Add search and compact CSV button to Ajalugu
+## Vendor filter and summary on Ajalugu
 
 ### What changes
 
 **1. `src/pages/History.tsx`**
-- Add `searchQuery` state
-- Add a search `<Input>` with placeholder "Otsi saaja või kirjelduse järgi..." placed above the filter row
-- Filter expenses client-side: `expenses.filter(e => vendor or description includes searchQuery, case-insensitive)`
-- Replace the full-width CSV download `<Button>` with a small icon-only button (place it inline next to the sort toggle)
-- Ensure the sort toggle (from previous story) and search all work together — search filters the already-fetched data, sort and year/category filters drive the query
 
-**2. `src/hooks/useExpenses.ts`** — No changes needed. Search is client-side filtering on already-fetched results.
+- Add `vendor` state (string, default `""`)
+- Derive vendor list from `expenses` array: `useMemo` to extract unique vendor names, sorted alphabetically — this ensures the list reflects active year/category filters automatically
+- Add a third `<Select>` for vendor in the filters row (between category and sort button)
+- Extend `filteredExpenses` logic: after search filtering, also filter by selected vendor
+- When a vendor is selected, show a summary card above the list: `"{vendor}: {count} kulu, kokku {total} €"` — computed from the final filtered list
+- When vendor is cleared (set to "all"), hide the summary
 
-### Layout (mobile)
+**2. Layout (mobile, 390px)**
 
 ```text
-[🔍 Otsi saaja või kirjelduse järgi...     ]
-[Aasta ▾]  [Kategooria ▾]  [↕] [⬇]
+[🔍 Otsi saaja või kirjelduse järgi...        ]
+[Aasta ▾] [Kategooria ▾] [Saaja ▾] [↕] [⬇]
+[Circle K: 3 kulu, kokku 146.05 €           ]  ← only when vendor selected
 [expense cards...]
 ```
 
-- Search input: full width
-- Filters row: two selects + sort toggle + compact CSV icon button, all in one row
-- No horizontal scrolling needed
+The three selects share flex space equally; sort and CSV remain icon buttons.
 
-### Security
-- No new database queries or RLS changes — search is purely client-side filtering of data already authorized by existing queries.
+**3. No backend changes** — vendor list is derived client-side from already-fetched expenses. No new queries, no RLS changes.
+
+### Technical details
+
+- Vendor list derived via `useMemo(() => [...new Set(expenses.map(e => e.vendor))].sort(), [expenses])` — updates automatically when year/category filters change the fetched data
+- Filtering chain: `expenses` → vendor filter → search filter → `filteredExpenses`
+- Summary computed via `useMemo` on `filteredExpenses` when vendor is active: count + sum of amounts
+- Clearing vendor filter: reset to `""`, summary hidden via conditional render
 

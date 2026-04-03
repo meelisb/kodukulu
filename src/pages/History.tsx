@@ -192,6 +192,12 @@ export default function History() {
       </div>
 
       {/* Sort indicator */}
+      {vendorSummary && (
+        <div className="mb-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm font-medium text-foreground">
+          {vendor}: {vendorSummary.count} kulu, kokku {vendorSummary.total.toFixed(2)} €
+        </div>
+      )}
+
       <p className="mb-3 text-xs text-muted-foreground">
         {sortAsc ? "↑ Vanimad ees" : "↓ Uusimad ees"}
         {searchQuery.trim() && ` · "${searchQuery.trim()}"`}

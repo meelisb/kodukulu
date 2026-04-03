@@ -49,15 +49,33 @@ export default function History() {
     sortAscending: sortAsc,
   });
 
+  const vendors = useMemo(
+    () => [...new Set(expenses.map((e) => e.vendor))].sort(),
+    [expenses]
+  );
+
   const filteredExpenses = useMemo(() => {
-    if (!searchQuery.trim()) return expenses;
-    const q = searchQuery.toLowerCase();
-    return expenses.filter(
-      (e) =>
-        e.vendor.toLowerCase().includes(q) ||
-        (e.description && e.description.toLowerCase().includes(q))
-    );
-  }, [expenses, searchQuery]);
+    let result = expenses;
+    if (vendor && vendor !== "all") {
+      result = result.filter((e) => e.vendor === vendor);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (e) =>
+          e.vendor.toLowerCase().includes(q) ||
+          (e.description && e.description.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [expenses, vendor, searchQuery]);
+
+  const vendorSummary = useMemo(() => {
+    if (!vendor || vendor === "all") return null;
+    const count = filteredExpenses.length;
+    const total = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+    return { count, total };
+  }, [vendor, filteredExpenses]);
 
   const updateExpense = useUpdateExpense();
   const deleteExpense = useDeleteExpense();

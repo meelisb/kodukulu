@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
-import { Download, Pencil, Trash2 } from "lucide-react";
+import { ArrowDownUp, Download, Pencil, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,8 @@ import { toast } from "@/components/ui/sonner";
 export default function History() {
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [sortAsc, setSortAsc] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
 
@@ -42,7 +45,18 @@ export default function History() {
   const { data: expenses = [], isLoading } = useExpenses({
     year: year && year !== "all" ? parseInt(year) : undefined,
     category: category && category !== "all" ? (category as Category) : "",
+    sortAscending: sortAsc,
   });
+
+  const filteredExpenses = useMemo(() => {
+    if (!searchQuery.trim()) return expenses;
+    const q = searchQuery.toLowerCase();
+    return expenses.filter(
+      (e) =>
+        e.vendor.toLowerCase().includes(q) ||
+        (e.description && e.description.toLowerCase().includes(q))
+    );
+  }, [expenses, searchQuery]);
 
   const updateExpense = useUpdateExpense();
   const deleteExpense = useDeleteExpense();
@@ -81,8 +95,19 @@ export default function History() {
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
       <h1 className="mb-4 text-2xl font-bold text-foreground">Ajalugu</h1>
 
-      {/* Filters */}
-      <div className="mb-4 flex gap-3">
+      {/* Search */}
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Otsi saaja või kirjelduse järgi..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="h-11 pl-9 text-base"
+        />
+      </div>
+
+      {/* Filters + Sort + CSV */}
+      <div className="mb-4 flex items-center gap-2">
         <Select value={year} onValueChange={setYear}>
           <SelectTrigger className="h-11 flex-1 text-base">
             <SelectValue placeholder="Aasta" />
@@ -110,29 +135,45 @@ export default function History() {
             ))}
           </SelectContent>
         </Select>
+
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-11 w-11 shrink-0"
+          onClick={() => setSortAsc((prev) => !prev)}
+          title={sortAsc ? "Vanimad ees" : "Uusimad ees"}
+        >
+          <ArrowDownUp className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-11 w-11 shrink-0"
+          onClick={() => exportToCSV(filteredExpenses)}
+          disabled={filteredExpenses.length === 0}
+          title="Laadi alla CSV"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* CSV Export */}
-      <Button
-        variant="outline"
-        className="mb-4 h-11 w-full text-base"
-        onClick={() => exportToCSV(expenses)}
-        disabled={expenses.length === 0}
-      >
-        <Download className="mr-2 h-5 w-5" />
-        Laadi alla CSV
-      </Button>
+      {/* Sort indicator */}
+      <p className="mb-3 text-xs text-muted-foreground">
+        {sortAsc ? "↑ Vanimad ees" : "↓ Uusimad ees"}
+        {searchQuery.trim() && ` · "${searchQuery.trim()}"`}
+      </p>
 
       {/* List */}
       {isLoading ? (
         <p className="py-8 text-center text-muted-foreground">Laadin...</p>
-      ) : expenses.length === 0 ? (
+      ) : filteredExpenses.length === 0 ? (
         <p className="py-8 text-center text-muted-foreground">
           Kulusid ei leitud
         </p>
       ) : (
         <div className="space-y-3">
-          {expenses.map((expense) => (
+          {filteredExpenses.map((expense) => (
             <div
               key={expense.id}
               className="rounded-lg border border-border bg-card p-4"

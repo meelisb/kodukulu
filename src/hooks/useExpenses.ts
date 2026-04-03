@@ -15,7 +15,7 @@ export function useExpenses(filters: ExpenseFilters = {}) {
       let query = supabase
         .from("expenses")
         .select("*")
-        .order("date", { ascending: false });
+        .order("date", { ascending: filters.sortAscending ?? false });
 
       if (filters.year) {
         query = query

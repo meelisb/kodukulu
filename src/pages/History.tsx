@@ -36,6 +36,7 @@ import { toast } from "@/components/ui/sonner";
 export default function History() {
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [vendor, setVendor] = useState<string>("");
   const [sortAsc, setSortAsc] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);

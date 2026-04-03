@@ -36,6 +36,7 @@ import { toast } from "@/components/ui/sonner";
 export default function History() {
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [vendor, setVendor] = useState<string>("");
   const [sortAsc, setSortAsc] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -48,15 +49,33 @@ export default function History() {
     sortAscending: sortAsc,
   });
 
+  const vendors = useMemo(
+    () => [...new Set(expenses.map((e) => e.vendor))].sort(),
+    [expenses]
+  );
+
   const filteredExpenses = useMemo(() => {
-    if (!searchQuery.trim()) return expenses;
-    const q = searchQuery.toLowerCase();
-    return expenses.filter(
-      (e) =>
-        e.vendor.toLowerCase().includes(q) ||
-        (e.description && e.description.toLowerCase().includes(q))
-    );
-  }, [expenses, searchQuery]);
+    let result = expenses;
+    if (vendor && vendor !== "all") {
+      result = result.filter((e) => e.vendor === vendor);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (e) =>
+          e.vendor.toLowerCase().includes(q) ||
+          (e.description && e.description.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [expenses, vendor, searchQuery]);
+
+  const vendorSummary = useMemo(() => {
+    if (!vendor || vendor === "all") return null;
+    const count = filteredExpenses.length;
+    const total = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+    return { count, total };
+  }, [vendor, filteredExpenses]);
 
   const updateExpense = useUpdateExpense();
   const deleteExpense = useDeleteExpense();
@@ -136,6 +155,20 @@ export default function History() {
           </SelectContent>
         </Select>
 
+        <Select value={vendor} onValueChange={setVendor}>
+          <SelectTrigger className="h-11 flex-1 text-base">
+            <SelectValue placeholder="Saaja" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Kõik saajad</SelectItem>
+            {vendors.map((v) => (
+              <SelectItem key={v} value={v}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <Button
           variant="outline"
           size="icon"
@@ -159,6 +192,12 @@ export default function History() {
       </div>
 
       {/* Sort indicator */}
+      {vendorSummary && (
+        <div className="mb-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm font-medium text-foreground">
+          {vendor}: {vendorSummary.count} kulu, kokku {vendorSummary.total.toFixed(2)} €
+        </div>
+      )}
+
       <p className="mb-3 text-xs text-muted-foreground">
         {sortAsc ? "↑ Vanimad ees" : "↓ Uusimad ees"}
         {searchQuery.trim() && ` · "${searchQuery.trim()}"`}

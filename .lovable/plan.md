@@ -1,35 +1,28 @@
 
 
-## Vendor filter and summary on Ajalugu
+## Post-save redirect to Ajalugu with highlighted entry
 
-### What changes
+### Changes
 
-**1. `src/pages/History.tsx`**
+**1. `src/pages/AddExpense.tsx`**
+- Import `useNavigate` from react-router-dom
+- On successful save, navigate to `/history?highlight={newExpenseId}` instead of just showing a toast
+- The new expense ID comes from the mutation's `onSuccess` data
+- Keep error handling as-is (stay on form, show error)
 
-- Add `vendor` state (string, default `""`)
-- Derive vendor list from `expenses` array: `useMemo` to extract unique vendor names, sorted alphabetically — this ensures the list reflects active year/category filters automatically
-- Add a third `<Select>` for vendor in the filters row (between category and sort button)
-- Extend `filteredExpenses` logic: after search filtering, also filter by selected vendor
-- When a vendor is selected, show a summary card above the list: `"{vendor}: {count} kulu, kokku {total} €"` — computed from the final filtered list
-- When vendor is cleared (set to "all"), hide the summary
-
-**2. Layout (mobile, 390px)**
-
-```text
-[🔍 Otsi saaja või kirjelduse järgi...        ]
-[Aasta ▾] [Kategooria ▾] [Saaja ▾] [↕] [⬇]
-[Circle K: 3 kulu, kokku 146.05 €           ]  ← only when vendor selected
-[expense cards...]
-```
-
-The three selects share flex space equally; sort and CSV remain icon buttons.
-
-**3. No backend changes** — vendor list is derived client-side from already-fetched expenses. No new queries, no RLS changes.
+**2. `src/pages/History.tsx`**
+- Read `highlight` query param via `useSearchParams`
+- Store highlighted ID in state, clear the query param on mount (so refreshing doesn't re-highlight)
+- When rendering expense cards, apply a highlight style (e.g. `ring-2 ring-primary bg-primary/5`) to the matching card
+- Use `useEffect` with a 3-second `setTimeout` to clear the highlight state, causing the ring to fade
+- Add a CSS transition (`transition-all duration-700`) on the card wrapper so the highlight fades smoothly
+- Auto-adjust the year filter: if the `highlight` param is present, extract the year from the new expense (via the expenses data) and set the year filter accordingly so the entry is visible
+- Use `useRef` + `scrollIntoView` to scroll the highlighted card into view
 
 ### Technical details
 
-- Vendor list derived via `useMemo(() => [...new Set(expenses.map(e => e.vendor))].sort(), [expenses])` — updates automatically when year/category filters change the fetched data
-- Filtering chain: `expenses` → vendor filter → search filter → `filteredExpenses`
-- Summary computed via `useMemo` on `filteredExpenses` when vendor is active: count + sum of amounts
-- Clearing vendor filter: reset to `""`, summary hidden via conditional render
+- The `useAddExpense` mutation already returns the created record (`select().single()`), so the ID is available in `onSuccess(data)`
+- Year filter adjustment: on mount, if highlight param exists, find the expense in the data and set year filter to match; reset category/vendor/search to ensure visibility
+- Highlight fade: `setTimeout(() => setHighlightId(null), 3000)` with cleanup in useEffect
+- Card class: `cn("rounded-lg border ...", expense.id === highlightId && "ring-2 ring-primary bg-primary/5 transition-all duration-700")`
 

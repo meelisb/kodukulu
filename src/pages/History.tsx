@@ -93,13 +93,6 @@ export default function History() {
     return () => clearTimeout(timer);
   }, [highlightId]);
 
-  // Scroll to highlighted card
-  useEffect(() => {
-    if (highlightId && highlightRef.current) {
-      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [highlightId, filteredExpenses]);
-
   const vendors = useMemo(
     () => [...new Set(expenses.map((e) => e.vendor))].sort(),
     [expenses]

@@ -261,7 +261,11 @@ export default function History() {
           {filteredExpenses.map((expense) => (
             <div
               key={expense.id}
-              className="rounded-lg border border-border bg-card p-4"
+              ref={expense.id === highlightId ? highlightRef : undefined}
+              className={cn(
+                "rounded-lg border border-border bg-card p-4 transition-all duration-700",
+                expense.id === highlightId && "ring-2 ring-primary bg-primary/5"
+              )}
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1">

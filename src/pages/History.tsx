@@ -57,6 +57,49 @@ export default function History() {
     sortAscending: sortAsc,
   });
 
+  // Auto-adjust year filter for highlighted expense
+  useEffect(() => {
+    if (!highlightId || highlightApplied.current) return;
+    if (isLoading) return;
+    
+    // Clear the URL param
+    searchParams.delete("highlight");
+    setSearchParams(searchParams, { replace: true });
+
+    // Find expense in unfiltered data — if not visible, reset filters
+    const found = expenses.find((e) => e.id === highlightId);
+    if (found) {
+      const expYear = new Date(found.date).getFullYear().toString();
+      if (year && year !== "all" && year !== expYear) {
+        setYear(expYear);
+      }
+      setCategory("");
+      setVendor("");
+      setSearchQuery("");
+      highlightApplied.current = true;
+    } else if (year || category) {
+      // Expense not in current filter set — clear filters to find it
+      setYear("");
+      setCategory("");
+      setVendor("");
+      setSearchQuery("");
+    }
+  }, [highlightId, expenses, isLoading]);
+
+  // Fade highlight after 3 seconds
+  useEffect(() => {
+    if (!highlightId) return;
+    const timer = setTimeout(() => setHighlightId(null), 3000);
+    return () => clearTimeout(timer);
+  }, [highlightId]);
+
+  // Scroll to highlighted card
+  useEffect(() => {
+    if (highlightId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [highlightId, filteredExpenses]);
+
   const vendors = useMemo(
     () => [...new Set(expenses.map((e) => e.vendor))].sort(),
     [expenses]

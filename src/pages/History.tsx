@@ -191,16 +191,6 @@ export default function History() {
           <ArrowDownUp className="h-4 w-4" />
         </Button>
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-11 w-11 shrink-0"
-          onClick={() => exportToCSV(filteredExpenses)}
-          disabled={filteredExpenses.length === 0}
-          title="Laadi alla CSV"
-        >
-          <Download className="h-4 w-4" />
-        </Button>
       </div>
 
       {/* Sort indicator */}

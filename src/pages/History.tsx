@@ -114,15 +114,27 @@ export default function History() {
     <div className="mx-auto max-w-lg px-4 pb-24 pt-6">
       <h1 className="mb-4 text-2xl font-bold text-foreground">Ajalugu</h1>
 
-      {/* Search */}
-      <div className="relative mb-3">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Otsi saaja või kirjelduse järgi..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-11 pl-9 text-base"
-        />
+      {/* Search + Download */}
+      <div className="mb-3 flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Otsi saaja või kirjelduse järgi..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-11 pl-9 text-base"
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-11 w-11 shrink-0"
+          onClick={() => exportToCSV(filteredExpenses)}
+          disabled={filteredExpenses.length === 0}
+          title="Laadi alla CSV"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Filters + Sort + CSV */}
@@ -179,16 +191,6 @@ export default function History() {
           <ArrowDownUp className="h-4 w-4" />
         </Button>
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-11 w-11 shrink-0"
-          onClick={() => exportToCSV(filteredExpenses)}
-          disabled={filteredExpenses.length === 0}
-          title="Laadi alla CSV"
-        >
-          <Download className="h-4 w-4" />
-        </Button>
       </div>
 
       {/* Sort indicator */}

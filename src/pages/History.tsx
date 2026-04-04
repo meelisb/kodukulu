@@ -36,6 +36,7 @@ import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";
 
 export default function History() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [vendor, setVendor] = useState<string>("");
@@ -43,6 +44,11 @@ export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(
+    searchParams.get("highlight")
+  );
+  const highlightRef = useRef<HTMLDivElement>(null);
+  const highlightApplied = useRef(false);
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({

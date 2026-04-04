@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
 import { ArrowDownUp, Download, Pencil, Search, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,6 +36,7 @@ import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";
 
 export default function History() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
   const [vendor, setVendor] = useState<string>("");
@@ -41,6 +44,11 @@ export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(
+    searchParams.get("highlight")
+  );
+  const highlightRef = useRef<HTMLDivElement>(null);
+  const highlightApplied = useRef(false);
 
   const { data: years = [] } = useExpenseYears();
   const { data: expenses = [], isLoading } = useExpenses({
@@ -48,6 +56,42 @@ export default function History() {
     category: category && category !== "all" ? (category as Category) : "",
     sortAscending: sortAsc,
   });
+
+  // Auto-adjust year filter for highlighted expense
+  useEffect(() => {
+    if (!highlightId || highlightApplied.current) return;
+    if (isLoading) return;
+    
+    // Clear the URL param
+    searchParams.delete("highlight");
+    setSearchParams(searchParams, { replace: true });
+
+    // Find expense in unfiltered data — if not visible, reset filters
+    const found = expenses.find((e) => e.id === highlightId);
+    if (found) {
+      const expYear = new Date(found.date).getFullYear().toString();
+      if (year && year !== "all" && year !== expYear) {
+        setYear(expYear);
+      }
+      setCategory("");
+      setVendor("");
+      setSearchQuery("");
+      highlightApplied.current = true;
+    } else if (year || category) {
+      // Expense not in current filter set — clear filters to find it
+      setYear("");
+      setCategory("");
+      setVendor("");
+      setSearchQuery("");
+    }
+  }, [highlightId, expenses, isLoading]);
+
+  // Fade highlight after 3 seconds
+  useEffect(() => {
+    if (!highlightId) return;
+    const timer = setTimeout(() => setHighlightId(null), 3000);
+    return () => clearTimeout(timer);
+  }, [highlightId]);
 
   const vendors = useMemo(
     () => [...new Set(expenses.map((e) => e.vendor))].sort(),
@@ -69,6 +113,13 @@ export default function History() {
     }
     return result;
   }, [expenses, vendor, searchQuery]);
+
+  // Scroll to highlighted card after list renders
+  useEffect(() => {
+    if (highlightId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [highlightId, filteredExpenses]);
 
   const vendorSummary = useMemo(() => {
     if (!vendor || vendor === "all") return null;
@@ -217,7 +268,11 @@ export default function History() {
           {filteredExpenses.map((expense) => (
             <div
               key={expense.id}
-              className="rounded-lg border border-border bg-card p-4"
+              ref={expense.id === highlightId ? highlightRef : undefined}
+              className={cn(
+                "rounded-lg border border-border bg-card p-4 transition-all duration-700",
+                expense.id === highlightId && "ring-2 ring-primary bg-primary/5"
+              )}
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1">

@@ -114,6 +114,13 @@ export default function History() {
     return result;
   }, [expenses, vendor, searchQuery]);
 
+  // Scroll to highlighted card after list renders
+  useEffect(() => {
+    if (highlightId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [highlightId, filteredExpenses]);
+
   const vendorSummary = useMemo(() => {
     if (!vendor || vendor === "all") return null;
     const count = filteredExpenses.length;

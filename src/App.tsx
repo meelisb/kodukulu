@@ -8,6 +8,7 @@ import AddExpense from "@/pages/AddExpense";
 import History from "@/pages/History";
 import Summary from "@/pages/Summary";
 import Login from "@/pages/Login";
+import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();

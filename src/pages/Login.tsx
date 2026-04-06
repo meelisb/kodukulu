@@ -77,34 +77,66 @@ export default function Login() {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Parool</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              minLength={6}
-              className="h-11 text-base"
-            />
-          </div>
+          {!isForgot && (
+            <div className="space-y-2">
+              <Label htmlFor="password">Parool</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                minLength={6}
+                className="h-11 text-base"
+              />
+            </div>
+          )}
+
+          {!isSignUp && !isForgot && (
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setIsForgot(true)}
+                className="text-sm text-muted-foreground hover:text-primary"
+              >
+                Unustasid parooli?
+              </button>
+            </div>
+          )}
 
           <Button type="submit" className="h-11 w-full text-base" disabled={loading}>
-            {loading ? "Palun oota..." : isSignUp ? "Loo konto" : "Logi sisse"}
+            {loading
+              ? "Palun oota..."
+              : isForgot
+                ? "Saada taastamislink"
+                : isSignUp
+                  ? "Loo konto"
+                  : "Logi sisse"}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
-          {isSignUp ? "Konto juba olemas?" : "Pole veel kontot?"}{" "}
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="font-medium text-primary underline-offset-4 hover:underline"
-          >
-            {isSignUp ? "Logi sisse" : "Loo konto"}
-          </button>
+          {isForgot ? (
+            <button
+              type="button"
+              onClick={() => setIsForgot(false)}
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Tagasi sisselogimisele
+            </button>
+          ) : (
+            <>
+              {isSignUp ? "Konto juba olemas?" : "Pole veel kontot?"}{" "}
+              <button
+                type="button"
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {isSignUp ? "Logi sisse" : "Loo konto"}
+              </button>
+            </>
+          )}
         </p>
       </div>
     </div>

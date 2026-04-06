@@ -32,6 +32,7 @@ function AppRoutes() {
           path="/login"
           element={user ? <Navigate to="/" replace /> : <Login />}
         />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<ProtectedRoute><AddExpense /></ProtectedRoute>} />
         <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
         <Route path="/summary" element={<ProtectedRoute><Summary /></ProtectedRoute>} />

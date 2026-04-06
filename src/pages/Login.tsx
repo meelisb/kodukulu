@@ -59,7 +59,7 @@ export default function Login() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-foreground">Kodukulu</h1>
           <p className="mt-2 text-muted-foreground">
-            {isSignUp ? "Loo uus konto" : "Logi sisse"}
+            {isForgot ? "Parooli taastamine" : isSignUp ? "Loo uus konto" : "Logi sisse"}
           </p>
         </div>
 

@@ -8,6 +8,7 @@ import AddExpense from "@/pages/AddExpense";
 import History from "@/pages/History";
 import Summary from "@/pages/Summary";
 import Login from "@/pages/Login";
+import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ function AppRoutes() {
           path="/login"
           element={user ? <Navigate to="/" replace /> : <Login />}
         />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<ProtectedRoute><AddExpense /></ProtectedRoute>} />
         <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
         <Route path="/summary" element={<ProtectedRoute><Summary /></ProtectedRoute>} />

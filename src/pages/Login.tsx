@@ -17,7 +17,14 @@ export default function Login() {
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (isForgot) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("Parooli taastamise link saadeti e-postile!");
+        setIsForgot(false);
+      } else if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,
           password,

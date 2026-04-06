@@ -14,38 +14,76 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       expenses: {
         Row: {
           amount: number
           category: string
+          category_id: string | null
           created_at: string
           date: string
           description: string | null
           fuel_quantity: number | null
           id: string
+          user_id: string | null
           vendor: string
         }
         Insert: {
           amount: number
           category: string
+          category_id?: string | null
           created_at?: string
           date?: string
           description?: string | null
           fuel_quantity?: number | null
           id?: string
+          user_id?: string | null
           vendor: string
         }
         Update: {
           amount?: number
           category?: string
+          category_id?: string | null
           created_at?: string
           date?: string
           description?: string | null
           fuel_quantity?: number | null
           id?: string
+          user_id?: string | null
           vendor?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "expenses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

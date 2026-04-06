@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { PlusCircle, Clock, BarChart3 } from "lucide-react";
+import { PlusCircle, Clock, BarChart3, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/AuthProvider";
 
 const tabs = [
   { path: "/", label: "Lisa kulu", icon: PlusCircle },
@@ -10,6 +11,7 @@ const tabs = [
 
 export default function BottomNav() {
   const { pathname } = useLocation();
+  const { signOut } = useAuth();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background safe-area-bottom">
@@ -32,6 +34,13 @@ export default function BottomNav() {
             </Link>
           );
         })}
+        <button
+          onClick={signOut}
+          className="flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <LogOut className="h-6 w-6" />
+          <span>Logi välja</span>
+        </button>
       </div>
     </nav>
   );

@@ -1,28 +1,54 @@
 
 
-## Post-save redirect to Ajalugu with highlighted entry
+## Vendor breakdown on Kokkuvõte
+
+### Approach
+
+Make each category row expandable using Collapsible. Clicking a category row toggles a vendor breakdown beneath it, showing vendors sorted by amount descending.
 
 ### Changes
 
-**1. `src/pages/AddExpense.tsx`**
-- Import `useNavigate` from react-router-dom
-- On successful save, navigate to `/history?highlight={newExpenseId}` instead of just showing a toast
-- The new expense ID comes from the mutation's `onSuccess` data
-- Keep error handling as-is (stay on form, show error)
+**`src/pages/Summary.tsx`**
 
-**2. `src/pages/History.tsx`**
-- Read `highlight` query param via `useSearchParams`
-- Store highlighted ID in state, clear the query param on mount (so refreshing doesn't re-highlight)
-- When rendering expense cards, apply a highlight style (e.g. `ring-2 ring-primary bg-primary/5`) to the matching card
-- Use `useEffect` with a 3-second `setTimeout` to clear the highlight state, causing the ring to fade
-- Add a CSS transition (`transition-all duration-700`) on the card wrapper so the highlight fades smoothly
-- Auto-adjust the year filter: if the `highlight` param is present, extract the year from the new expense (via the expenses data) and set the year filter accordingly so the entry is visible
-- Use `useRef` + `scrollIntoView` to scroll the highlighted card into view
+- Import `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` from `@/components/ui/collapsible`
+- Import `ChevronRight` from lucide-react and `useMemo` from React
+- Compute a `vendorBreakdown` map: for each category, group expenses by vendor, sum amounts, sort descending
+- Replace the static `<TableRow>` per category with a `<Collapsible>` wrapper:
+  - The category row becomes `<CollapsibleTrigger>` — shows category name, total, and a chevron icon that rotates on open
+  - `<CollapsibleContent>` renders indented sub-rows for each vendor with their subtotal
+- Categories with total 0 remain static (no expand)
+- Grand total footer row unchanged
+
+### Layout
+
+```text
+| ▸ Auto                    | 1 031.60 |
+|   Circle K                |   540.20 |  ← expanded
+|   Terminal                |   312.50 |
+|   Olerex                  |   178.90 |
+| ▸ Ehitus                  | 2 450.00 |
+| Kokku                     | 5 231.60 |
+```
 
 ### Technical details
 
-- The `useAddExpense` mutation already returns the created record (`select().single()`), so the ID is available in `onSuccess(data)`
-- Year filter adjustment: on mount, if highlight param exists, find the expense in the data and set year filter to match; reset category/vendor/search to ensure visibility
-- Highlight fade: `setTimeout(() => setHighlightId(null), 3000)` with cleanup in useEffect
-- Card class: `cn("rounded-lg border ...", expense.id === highlightId && "ring-2 ring-primary bg-primary/5 transition-all duration-700")`
+- Vendor breakdown computed via `useMemo`:
+  ```typescript
+  const vendorBreakdown = useMemo(() => {
+    const map: Record<string, { vendor: string; total: number }[]> = {};
+    CATEGORIES.forEach(cat => {
+      const groups: Record<string, number> = {};
+      expenses.filter(e => e.category === cat).forEach(e => {
+        groups[e.vendor] = (groups[e.vendor] || 0) + Number(e.amount);
+      });
+      map[cat] = Object.entries(groups)
+        .map(([vendor, total]) => ({ vendor, total }))
+        .sort((a, b) => b.total - a.total);
+    });
+    return map;
+  }, [expenses]);
+  ```
+- Use `<Collapsible>` per category row instead of Accordion to keep table structure simple
+- Chevron rotates via `data-[state=open]:rotate-90` transition
+- No backend changes — uses existing expense data
 

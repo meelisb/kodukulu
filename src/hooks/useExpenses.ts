@@ -43,6 +43,8 @@ export function useAddExpense() {
       vendor: string;
       description?: string;
       category: string;
+      category_id: string;
+      user_id: string;
       amount: number;
       fuel_quantity?: number | null;
     }) => {

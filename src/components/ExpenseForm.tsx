@@ -65,6 +65,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { parseReceipt, isParsing } = useReceiptParser();
 
+  const { data: categories = [] } = useCategories();
   const { data: vendorSuggestions = [] } = useVendorSuggestions();
   const { data: descriptionSuggestions = [] } = useDescriptionSuggestions();
 

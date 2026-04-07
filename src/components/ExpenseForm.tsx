@@ -107,7 +107,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
       if (result.description) {
         setDescription(toSentenceCase(result.description));
       }
-      if (result.category && CATEGORIES.includes(result.category as typeof CATEGORIES[number])) {
+      if (result.category && categories.some(c => c.name === result.category)) {
         setCategory(result.category);
       }
       if (result.amount !== undefined && result.amount !== null) {

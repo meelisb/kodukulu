@@ -270,9 +270,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
             <SelectValue placeholder="Vali kategooria" />
           </SelectTrigger>
           <SelectContent>
-            {CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat} className="text-base">
-                {cat}
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.name} className="text-base">
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>

@@ -42,37 +42,37 @@ export type Database = {
         Row: {
           amount: number
           category: string
-          category_id: string | null
+          category_id: string
           created_at: string
           date: string
           description: string | null
           fuel_quantity: number | null
           id: string
-          user_id: string | null
+          user_id: string
           vendor: string
         }
         Insert: {
           amount: number
           category: string
-          category_id?: string | null
+          category_id: string
           created_at?: string
           date?: string
           description?: string | null
           fuel_quantity?: number | null
           id?: string
-          user_id?: string | null
+          user_id: string
           vendor: string
         }
         Update: {
           amount?: number
           category?: string
-          category_id?: string | null
+          category_id?: string
           created_at?: string
           date?: string
           description?: string | null
           fuel_quantity?: number | null
           id?: string
-          user_id?: string | null
+          user_id?: string
           vendor?: string
         }
         Relationships: [

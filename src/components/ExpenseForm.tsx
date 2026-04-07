@@ -36,7 +36,7 @@ export interface ExpenseFormData {
 }
 
 interface ExpenseFormProps {
-  initialData?: Expense;
+  initialData?: { id: string; date: string; vendor: string; description?: string | null; category: string; category_id?: string | null; amount: number; fuel_quantity?: number | null };
   onSubmit: (data: ExpenseFormData) => void;
   onCancel?: () => void;
   isSubmitting?: boolean;

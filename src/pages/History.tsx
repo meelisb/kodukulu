@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
 import { ArrowDownUp, Download, Pencil, Search, Trash2 } from "lucide-react";

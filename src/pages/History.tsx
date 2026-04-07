@@ -54,7 +54,7 @@ export default function History() {
   const highlightApplied = useRef(false);
 
   const { data: years = [] } = useExpenseYears();
-  const { data: expenses = [], isLoading } = useExpenses({
+  const { data: dbCategories = [] } = useCategories();
     year: year && year !== "all" ? parseInt(year) : undefined,
     category: category && category !== "all" ? (category as Category) : "",
     sortAscending: sortAsc,

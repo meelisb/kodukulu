@@ -30,6 +30,7 @@ export interface ExpenseFormData {
   vendor: string;
   description?: string;
   category: string;
+  category_id: string;
   amount: number;
   fuel_quantity?: number | null;
 }

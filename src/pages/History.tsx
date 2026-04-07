@@ -150,9 +150,9 @@ export default function History() {
   };
 
   const handleUpdate = (data: ExpenseFormData) => {
-    if (!editingExpense) return;
+    if (!editingExpense || !user) return;
     updateExpense.mutate(
-      { id: editingExpense.id, ...data },
+      { id: editingExpense.id, ...data, user_id: user.id },
       {
         onSuccess: () => {
           toast.success("Kulu muudetud!");

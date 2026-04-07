@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { CATEGORIES, type Expense } from "@/types/expense";
+import { useCategories, type CategoryRow } from "@/hooks/useCategories";
 import { AutocompleteInput } from "@/components/AutocompleteInput";
 import { useVendorSuggestions, useDescriptionSuggestions } from "@/hooks/useAutocompleteSuggestions";
 import { useReceiptParser } from "@/hooks/useReceiptParser";

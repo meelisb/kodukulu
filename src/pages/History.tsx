@@ -214,9 +214,9 @@ export default function History() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Kõik</SelectItem>
-            {CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+            {dbCategories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.name}>
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>

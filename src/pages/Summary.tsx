@@ -16,7 +16,7 @@ import {
   TableFooter,
 } from "@/components/ui/table";
 import { useExpenses, useExpenseYears } from "@/hooks/useExpenses";
-import { CATEGORIES, type Category } from "@/types/expense";
+import { useCategories } from "@/hooks/useCategories";
 import { cn } from "@/lib/utils";
 
 export default function Summary() {
@@ -24,19 +24,20 @@ export default function Summary() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const { data: years = [] } = useExpenseYears();
+  const { data: categories = [] } = useCategories();
   const { data: expenses = [], isLoading } = useExpenses({
     year: year && year !== "all" ? parseInt(year) : undefined,
   });
 
-  const totals = CATEGORIES.reduce(
-    (acc, cat) => {
-      acc[cat] = expenses
-        .filter((e) => e.category === cat)
+  const totals = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const cat of categories) {
+      map[cat.name] = expenses
+        .filter((e) => e.category === cat.name)
         .reduce((sum, e) => sum + Number(e.amount), 0);
-      return acc;
-    },
-    {} as Record<Category, number>
-  );
+    }
+    return map;
+  }, [categories, expenses]);
 
   const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0);
 
@@ -93,25 +94,25 @@ export default function Summary() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <>
                 <TableRow
-                  key={cat}
+                  key={cat.id}
                   className={cn(
                     "cursor-pointer transition-colors",
-                    totals[cat] === 0 && "cursor-default opacity-50",
-                    selectedCategory === cat && "bg-accent"
+                    (totals[cat.name] ?? 0) === 0 && "cursor-default opacity-50",
+                    selectedCategory === cat.name && "bg-accent"
                   )}
-                  onClick={() => totals[cat] > 0 && handleCategoryClick(cat)}
+                  onClick={() => (totals[cat.name] ?? 0) > 0 && handleCategoryClick(cat.name)}
                 >
-                  <TableCell className="text-base">{cat}</TableCell>
+                  <TableCell className="text-base">{cat.name}</TableCell>
                   <TableCell className="text-right text-base font-medium">
-                    {totals[cat].toFixed(2)}
+                    {(totals[cat.name] ?? 0).toFixed(2)}
                   </TableCell>
                 </TableRow>
-                {selectedCategory === cat && vendorBreakdown.length > 0 && (
+                {selectedCategory === cat.name && vendorBreakdown.length > 0 && (
                   vendorBreakdown.map((v) => (
-                    <TableRow key={`${cat}-${v.vendor}`} className="bg-muted/50">
+                    <TableRow key={`${cat.id}-${v.vendor}`} className="bg-muted/50">
                       <TableCell className="pl-8 text-sm text-muted-foreground">
                         {v.vendor}
                         <span className="ml-1 text-xs">({v.count})</span>

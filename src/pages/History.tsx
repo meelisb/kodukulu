@@ -38,6 +38,7 @@ import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";
 
 export default function History() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");

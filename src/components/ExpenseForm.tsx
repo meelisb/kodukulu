@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { CATEGORIES, type Expense } from "@/types/expense";
+import { useCategories, type CategoryRow } from "@/hooks/useCategories";
 import { AutocompleteInput } from "@/components/AutocompleteInput";
 import { useVendorSuggestions, useDescriptionSuggestions } from "@/hooks/useAutocompleteSuggestions";
 import { useReceiptParser } from "@/hooks/useReceiptParser";
@@ -30,12 +30,13 @@ export interface ExpenseFormData {
   vendor: string;
   description?: string;
   category: string;
+  category_id: string;
   amount: number;
   fuel_quantity?: number | null;
 }
 
 interface ExpenseFormProps {
-  initialData?: Expense;
+  initialData?: { id: string; date: string; vendor: string; description?: string | null; category: string; category_id?: string | null; amount: number; fuel_quantity?: number | null };
   onSubmit: (data: ExpenseFormData) => void;
   onCancel?: () => void;
   isSubmitting?: boolean;
@@ -64,6 +65,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { parseReceipt, isParsing } = useReceiptParser();
 
+  const { data: categories = [] } = useCategories();
   const { data: vendorSuggestions = [] } = useVendorSuggestions();
   const { data: descriptionSuggestions = [] } = useDescriptionSuggestions();
 
@@ -105,7 +107,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
       if (result.description) {
         setDescription(toSentenceCase(result.description));
       }
-      if (result.category && CATEGORIES.includes(result.category as typeof CATEGORIES[number])) {
+      if (result.category && categories.some(c => c.name === result.category)) {
         setCategory(result.category);
       }
       if (result.amount !== undefined && result.amount !== null) {
@@ -129,11 +131,15 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
     e.preventDefault();
     if (!vendor || !category || !amount) return;
 
+    const matchedCategory = categories.find(c => c.name === category);
+    if (!matchedCategory) return;
+
     onSubmit({
       date: format(date, "yyyy-MM-dd"),
       vendor,
       description: description || undefined,
       category,
+      category_id: matchedCategory.id,
       amount: parseFloat(amount.replace(",", ".")),
       fuel_quantity:
         category === "Auto" && fuelQuantity
@@ -264,9 +270,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
             <SelectValue placeholder="Vali kategooria" />
           </SelectTrigger>
           <SelectContent>
-            {CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat} className="text-base">
-                {cat}
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.name} className="text-base">
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>

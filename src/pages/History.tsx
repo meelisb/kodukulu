@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
 import { format } from "date-fns";
 import { et } from "date-fns/locale";
 import { ArrowDownUp, Download, Pencil, Search, Trash2 } from "lucide-react";
@@ -31,11 +32,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import CategoryBadge from "@/components/CategoryBadge";
 import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense, useDeleteExpense } from "@/hooks/useExpenses";
-import { CATEGORIES, type Category, type Expense } from "@/types/expense";
+import { type Category, type Expense } from "@/types/expense";
+import { useCategories } from "@/hooks/useCategories";
 import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";
 
 export default function History() {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [year, setYear] = useState<string>("");
   const [category, setCategory] = useState<string>("");
@@ -51,6 +54,7 @@ export default function History() {
   const highlightApplied = useRef(false);
 
   const { data: years = [] } = useExpenseYears();
+  const { data: dbCategories = [] } = useCategories();
   const { data: expenses = [], isLoading } = useExpenses({
     year: year && year !== "all" ? parseInt(year) : undefined,
     category: category && category !== "all" ? (category as Category) : "",
@@ -146,9 +150,9 @@ export default function History() {
   };
 
   const handleUpdate = (data: ExpenseFormData) => {
-    if (!editingExpense) return;
+    if (!editingExpense || !user) return;
     updateExpense.mutate(
-      { id: editingExpense.id, ...data },
+      { id: editingExpense.id, ...data, user_id: user.id },
       {
         onSuccess: () => {
           toast.success("Kulu muudetud!");
@@ -210,9 +214,9 @@ export default function History() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Kõik</SelectItem>
-            {CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+            {dbCategories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.name}>
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>

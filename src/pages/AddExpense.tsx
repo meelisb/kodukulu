@@ -2,24 +2,30 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { useAddExpense } from "@/hooks/useExpenses";
+import { useAuth } from "@/components/AuthProvider";
 import { toast } from "@/components/ui/sonner";
 
 export default function AddExpense() {
   const addExpense = useAddExpense();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [formKey, setFormKey] = useState(0);
 
   const handleSubmit = (data: ExpenseFormData) => {
-    addExpense.mutate(data, {
-      onSuccess: (created) => {
-        toast.success("Kulu salvestatud!");
-        setFormKey((prev) => prev + 1);
-        navigate(`/history?highlight=${created.id}`);
-      },
-      onError: () => {
-        toast.error("Viga salvestamisel");
-      },
-    });
+    if (!user) return;
+    addExpense.mutate(
+      { ...data, user_id: user.id },
+      {
+        onSuccess: (created) => {
+          toast.success("Kulu salvestatud!");
+          setFormKey((prev) => prev + 1);
+          navigate(`/history?highlight=${created.id}`);
+        },
+        onError: () => {
+          toast.error("Viga salvestamisel");
+        },
+      }
+    );
   };
 
   return (

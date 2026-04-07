@@ -131,11 +131,15 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
     e.preventDefault();
     if (!vendor || !category || !amount) return;
 
+    const matchedCategory = categories.find(c => c.name === category);
+    if (!matchedCategory) return;
+
     onSubmit({
       date: format(date, "yyyy-MM-dd"),
       vendor,
       description: description || undefined,
       category,
+      category_id: matchedCategory.id,
       amount: parseFloat(amount.replace(",", ".")),
       fuel_quantity:
         category === "Auto" && fuelQuantity

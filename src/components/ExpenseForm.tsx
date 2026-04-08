@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useCategories, type CategoryRow } from "@/hooks/useCategories";
+import { useCategories } from "@/hooks/useCategories";
 import { AutocompleteInput } from "@/components/AutocompleteInput";
 import { useVendorSuggestions, useDescriptionSuggestions } from "@/hooks/useAutocompleteSuggestions";
 import { useReceiptParser } from "@/hooks/useReceiptParser";
@@ -29,14 +29,22 @@ export interface ExpenseFormData {
   date: string;
   vendor: string;
   description?: string;
-  category: string;
   category_id: string;
   amount: number;
   fuel_quantity?: number | null;
 }
 
 interface ExpenseFormProps {
-  initialData?: { id: string; date: string; vendor: string; description?: string | null; category: string; category_id?: string | null; amount: number; fuel_quantity?: number | null };
+  initialData?: {
+    id: string;
+    date: string;
+    vendor: string;
+    description?: string | null;
+    category?: string;
+    category_id?: string | null;
+    amount: number;
+    fuel_quantity?: number | null;
+  };
   onSubmit: (data: ExpenseFormData) => void;
   onCancel?: () => void;
   isSubmitting?: boolean;
@@ -48,26 +56,28 @@ const toSentenceCase = (str: string): string => {
 };
 
 const parseDateString = (dateStr: string): Date => {
-  // Parse "YYYY-MM-DD" without timezone shift
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d);
 };
 
 export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: ExpenseFormProps) {
+  const { data: categories = [] } = useCategories();
+  const { data: vendorSuggestions = [] } = useVendorSuggestions();
+  const { data: descriptionSuggestions = [] } = useDescriptionSuggestions();
+
   const [date, setDate] = useState<Date>(initialData ? parseDateString(initialData.date) : new Date());
   const [dateText, setDateText] = useState(format(initialData ? parseDateString(initialData.date) : new Date(), "dd.MM.yyyy"));
   const [vendor, setVendor] = useState(initialData?.vendor || "");
   const [description, setDescription] = useState(initialData?.description || "");
-  const [category, setCategory] = useState(initialData?.category || "");
+  const [categoryId, setCategoryId] = useState(initialData?.category_id || "");
   const [amount, setAmount] = useState(initialData?.amount?.toString().replace(".", ",") || "");
   const [fuelQuantity, setFuelQuantity] = useState(initialData?.fuel_quantity?.toString().replace(".", ",") || "");
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { parseReceipt, isParsing } = useReceiptParser();
 
-  const { data: categories = [] } = useCategories();
-  const { data: vendorSuggestions = [] } = useVendorSuggestions();
-  const { data: descriptionSuggestions = [] } = useDescriptionSuggestions();
+  // Resolve category name for "Auto" fuel field logic
+  const selectedCategoryName = categories.find(c => c.id === categoryId)?.name || "";
 
   useEffect(() => {
     if (initialData) {
@@ -76,7 +86,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
       setDateText(format(d, "dd.MM.yyyy"));
       setVendor(initialData.vendor);
       setDescription(initialData.description || "");
-      setCategory(initialData.category);
+      setCategoryId(initialData.category_id || "");
       setAmount(initialData.amount.toString().replace(".", ","));
       setFuelQuantity(initialData.fuel_quantity?.toString().replace(".", ",") || "");
     }
@@ -107,8 +117,9 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
       if (result.description) {
         setDescription(toSentenceCase(result.description));
       }
-      if (result.category && categories.some(c => c.name === result.category)) {
-        setCategory(result.category);
+      if (result.category) {
+        const matched = categories.find(c => c.name === result.category);
+        if (matched) setCategoryId(matched.id);
       }
       if (result.amount !== undefined && result.amount !== null) {
         setAmount(result.amount.toString().replace(".", ","));
@@ -121,7 +132,6 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
       toast.error("Kviitungi analüüsimine ebaõnnestus");
     }
 
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -129,20 +139,16 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vendor || !category || !amount) return;
-
-    const matchedCategory = categories.find(c => c.name === category);
-    if (!matchedCategory) return;
+    if (!vendor || !categoryId || !amount) return;
 
     onSubmit({
       date: format(date, "yyyy-MM-dd"),
       vendor,
       description: description || undefined,
-      category,
-      category_id: matchedCategory.id,
+      category_id: categoryId,
       amount: parseFloat(amount.replace(",", ".")),
       fuel_quantity:
-        category === "Auto" && fuelQuantity
+        selectedCategoryName === "Auto" && fuelQuantity
           ? parseFloat(fuelQuantity.replace(",", "."))
           : null,
     });
@@ -154,12 +160,12 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
     setDateText(format(d, "dd.MM.yyyy"));
     setVendor(initialData?.vendor || "");
     setDescription(initialData?.description || "");
-    setCategory(initialData?.category || "");
+    setCategoryId(initialData?.category_id || "");
     setAmount(initialData?.amount?.toString().replace(".", ",") || "");
     setFuelQuantity(initialData?.fuel_quantity?.toString().replace(".", ",") || "");
   };
 
-  const isFormValid = vendor && category && amount;
+  const isFormValid = vendor && categoryId && amount;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -265,13 +271,13 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
 
       <div className="space-y-2">
         <Label className="text-base font-semibold">Kategooria *</Label>
-        <Select value={category} onValueChange={setCategory}>
+        <Select value={categoryId} onValueChange={setCategoryId}>
           <SelectTrigger className="h-12 text-base">
             <SelectValue placeholder="Vali kategooria" />
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.name} className="text-base">
+              <SelectItem key={cat.id} value={cat.id} className="text-base">
                 {cat.name}
               </SelectItem>
             ))}
@@ -290,7 +296,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
         />
       </div>
 
-      {category === "Auto" && (
+      {selectedCategoryName === "Auto" && (
         <div className="space-y-2">
           <Label className="text-base font-semibold">Kütuse kogus (l)</Label>
           <Input

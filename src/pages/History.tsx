@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import CategoryBadge from "@/components/CategoryBadge";
 import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense, useDeleteExpense } from "@/hooks/useExpenses";
-import { type Category, type Expense } from "@/types/expense";
+import { type Expense } from "@/types/expense";
 import { useCategories } from "@/hooks/useCategories";
 import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";
@@ -41,7 +41,7 @@ export default function History() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [year, setYear] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string>("");
   const [vendor, setVendor] = useState<string>("");
   const [sortAsc, setSortAsc] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,40 +57,45 @@ export default function History() {
   const { data: dbCategories = [] } = useCategories();
   const { data: expenses = [], isLoading } = useExpenses({
     year: year && year !== "all" ? parseInt(year) : undefined,
-    category: category && category !== "all" ? (category as Category) : "",
+    categoryId: categoryId && categoryId !== "all" ? categoryId : undefined,
     sortAscending: sortAsc,
   });
+
+  // Build category lookup map
+  const categoryMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const cat of dbCategories) {
+      map[cat.id] = cat.name;
+    }
+    return map;
+  }, [dbCategories]);
 
   // Auto-adjust year filter for highlighted expense
   useEffect(() => {
     if (!highlightId || highlightApplied.current) return;
     if (isLoading) return;
     
-    // Clear the URL param
     searchParams.delete("highlight");
     setSearchParams(searchParams, { replace: true });
 
-    // Find expense in unfiltered data — if not visible, reset filters
     const found = expenses.find((e) => e.id === highlightId);
     if (found) {
       const expYear = new Date(found.date).getFullYear().toString();
       if (year && year !== "all" && year !== expYear) {
         setYear(expYear);
       }
-      setCategory("");
+      setCategoryId("");
       setVendor("");
       setSearchQuery("");
       highlightApplied.current = true;
-    } else if (year || category) {
-      // Expense not in current filter set — clear filters to find it
+    } else if (year || categoryId) {
       setYear("");
-      setCategory("");
+      setCategoryId("");
       setVendor("");
       setSearchQuery("");
     }
   }, [highlightId, expenses, isLoading]);
 
-  // Fade highlight after 3 seconds
   useEffect(() => {
     if (!highlightId) return;
     const timer = setTimeout(() => setHighlightId(null), 3000);
@@ -118,7 +123,6 @@ export default function History() {
     return result;
   }, [expenses, vendor, searchQuery]);
 
-  // Scroll to highlighted card after list renders
   useEffect(() => {
     if (highlightId && highlightRef.current) {
       highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -184,7 +188,7 @@ export default function History() {
           variant="outline"
           size="icon"
           className="h-11 w-11 shrink-0"
-          onClick={() => exportToCSV(filteredExpenses)}
+          onClick={() => exportToCSV(filteredExpenses, categoryMap)}
           disabled={filteredExpenses.length === 0}
           title="Laadi alla CSV"
         >
@@ -192,7 +196,7 @@ export default function History() {
         </Button>
       </div>
 
-      {/* Filters + Sort + CSV */}
+      {/* Filters + Sort */}
       <div className="mb-4 flex items-center gap-2">
         <Select value={year} onValueChange={setYear}>
           <SelectTrigger className="h-11 flex-1 text-base">
@@ -208,14 +212,14 @@ export default function History() {
           </SelectContent>
         </Select>
 
-        <Select value={category} onValueChange={setCategory}>
+        <Select value={categoryId} onValueChange={setCategoryId}>
           <SelectTrigger className="h-11 flex-1 text-base">
             <SelectValue placeholder="Kategooria" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Kõik</SelectItem>
             {dbCategories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.name}>
+              <SelectItem key={cat.id} value={cat.id}>
                 {cat.name}
               </SelectItem>
             ))}
@@ -245,10 +249,8 @@ export default function History() {
         >
           <ArrowDownUp className="h-4 w-4" />
         </Button>
-
       </div>
 
-      {/* Sort indicator */}
       {vendorSummary && (
         <div className="mb-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm font-medium text-foreground">
           {vendor}: {vendorSummary.count} kulu, kokku {vendorSummary.total.toFixed(2)} €
@@ -260,7 +262,6 @@ export default function History() {
         {searchQuery.trim() && ` · "${searchQuery.trim()}"`}
       </p>
 
-      {/* List */}
       {isLoading ? (
         <p className="py-8 text-center text-muted-foreground">Laadin...</p>
       ) : filteredExpenses.length === 0 ? (
@@ -319,7 +320,7 @@ export default function History() {
                   <p className="text-lg font-bold text-foreground">
                     {expense.amount.toFixed(2)} €
                   </p>
-                  <CategoryBadge category={expense.category} />
+                  <CategoryBadge category={categoryMap[expense.category_id] || ""} />
                 </div>
               </div>
             </div>
@@ -334,7 +335,11 @@ export default function History() {
           </DialogHeader>
           {editingExpense && (
             <ExpenseForm
-              initialData={editingExpense}
+              initialData={{
+                ...editingExpense,
+                description: editingExpense.description ?? undefined,
+                category: categoryMap[editingExpense.category_id] || "",
+              }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingExpense(null)}
               isSubmitting={updateExpense.isPending}

@@ -1,10 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Expense, Category } from "@/types/expense";
+import type { Expense } from "@/types/expense";
 
 interface ExpenseFilters {
   year?: number;
-  category?: Category | "";
+  categoryId?: string;
   sortAscending?: boolean;
 }
 
@@ -23,8 +23,8 @@ export function useExpenses(filters: ExpenseFilters = {}) {
           .lte("date", `${filters.year}-12-31`);
       }
 
-      if (filters.category) {
-        query = query.eq("category", filters.category);
+      if (filters.categoryId) {
+        query = query.eq("category_id", filters.categoryId);
       }
 
       const { data, error } = await query;
@@ -42,7 +42,6 @@ export function useAddExpense() {
       date: string;
       vendor: string;
       description?: string;
-      category: string;
       category_id: string;
       user_id: string;
       amount: number;
@@ -117,13 +116,13 @@ export function useExpenseYears() {
   });
 }
 
-export function exportToCSV(expenses: Expense[]) {
+export function exportToCSV(expenses: Expense[], categoryMap: Record<string, string>) {
   const headers = ["Kuupäev", "Saaja", "Kirjeldus", "Kategooria", "Summa (€)", "Kütuse kogus (l)"];
   const rows = expenses.map((e) => [
     e.date,
     e.vendor,
     e.description || "",
-    e.category,
+    categoryMap[e.category_id] || "",
     e.amount.toString().replace(".", ","),
     e.fuel_quantity?.toString().replace(".", ",") || "",
   ]);

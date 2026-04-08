@@ -32,8 +32,8 @@ export default function Summary() {
   const totals = useMemo(() => {
     const map: Record<string, number> = {};
     for (const cat of categories) {
-      map[cat.name] = expenses
-        .filter((e) => e.category === cat.name)
+      map[cat.id] = expenses
+        .filter((e) => e.category_id === cat.id)
         .reduce((sum, e) => sum + Number(e.amount), 0);
     }
     return map;
@@ -46,7 +46,7 @@ export default function Summary() {
     if (!selectedCategory) return [];
     const groups: Record<string, { vendor: string; count: number; total: number }> = {};
     expenses
-      .filter((e) => e.category === selectedCategory)
+      .filter((e) => e.category_id === selectedCategory)
       .forEach((e) => {
         if (!groups[e.vendor]) {
           groups[e.vendor] = { vendor: e.vendor, count: 0, total: 0 };
@@ -57,8 +57,8 @@ export default function Summary() {
     return Object.values(groups).sort((a, b) => b.total - a.total);
   }, [expenses, selectedCategory]);
 
-  const handleCategoryClick = (cat: string) => {
-    setSelectedCategory((prev) => (prev === cat ? null : cat));
+  const handleCategoryClick = (catId: string) => {
+    setSelectedCategory((prev) => (prev === catId ? null : catId));
   };
 
   return (
@@ -100,17 +100,17 @@ export default function Summary() {
                   key={cat.id}
                   className={cn(
                     "cursor-pointer transition-colors",
-                    (totals[cat.name] ?? 0) === 0 && "cursor-default opacity-50",
-                    selectedCategory === cat.name && "bg-accent"
+                    (totals[cat.id] ?? 0) === 0 && "cursor-default opacity-50",
+                    selectedCategory === cat.id && "bg-accent"
                   )}
-                  onClick={() => (totals[cat.name] ?? 0) > 0 && handleCategoryClick(cat.name)}
+                  onClick={() => (totals[cat.id] ?? 0) > 0 && handleCategoryClick(cat.id)}
                 >
                   <TableCell className="text-base">{cat.name}</TableCell>
                   <TableCell className="text-right text-base font-medium">
-                    {(totals[cat.name] ?? 0).toFixed(2)}
+                    {(totals[cat.id] ?? 0).toFixed(2)}
                   </TableCell>
                 </TableRow>
-                {selectedCategory === cat.name && vendorBreakdown.length > 0 && (
+                {selectedCategory === cat.id && vendorBreakdown.length > 0 && (
                   vendorBreakdown.map((v) => (
                     <TableRow key={`${cat.id}-${v.vendor}`} className="bg-muted/50">
                       <TableCell className="pl-8 text-sm text-muted-foreground">

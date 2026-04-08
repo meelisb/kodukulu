@@ -41,7 +41,6 @@ export default function Summary() {
 
   const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0);
 
-  // Vendor breakdown for the selected category
   const vendorBreakdown = useMemo(() => {
     if (!selectedCategory) return [];
     const groups: Record<string, { vendor: string; count: number; total: number }> = {};

@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import CategoryBadge from "@/components/CategoryBadge";
 import { useExpenses, useExpenseYears, exportToCSV, useUpdateExpense, useDeleteExpense } from "@/hooks/useExpenses";
-import { type Expense } from "@/types/expense";
+import { type ExpenseWithCategory } from "@/types/expense";
 import { useCategories } from "@/hooks/useCategories";
 import { ExpenseForm, type ExpenseFormData } from "@/components/ExpenseForm";
 import { toast } from "@/components/ui/sonner";
@@ -45,7 +45,7 @@ export default function History() {
   const [vendor, setVendor] = useState<string>("");
   const [sortAsc, setSortAsc] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [editingExpense, setEditingExpense] = useState<ExpenseWithCategory | null>(null);
   const [deletingExpenseId, setDeletingExpenseId] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(
     searchParams.get("highlight")
@@ -61,20 +61,11 @@ export default function History() {
     sortAscending: sortAsc,
   });
 
-  // Build category lookup map
-  const categoryMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const cat of dbCategories) {
-      map[cat.id] = cat.name;
-    }
-    return map;
-  }, [dbCategories]);
-
   // Auto-adjust year filter for highlighted expense
   useEffect(() => {
     if (!highlightId || highlightApplied.current) return;
     if (isLoading) return;
-    
+
     searchParams.delete("highlight");
     setSearchParams(searchParams, { replace: true });
 
@@ -188,7 +179,7 @@ export default function History() {
           variant="outline"
           size="icon"
           className="h-11 w-11 shrink-0"
-          onClick={() => exportToCSV(filteredExpenses, categoryMap)}
+          onClick={() => exportToCSV(filteredExpenses)}
           disabled={filteredExpenses.length === 0}
           title="Laadi alla CSV"
         >
@@ -320,7 +311,7 @@ export default function History() {
                   <p className="text-lg font-bold text-foreground">
                     {expense.amount.toFixed(2)} €
                   </p>
-                  <CategoryBadge category={categoryMap[expense.category_id] || ""} />
+                  <CategoryBadge category={expense.categories?.name || ""} />
                 </div>
               </div>
             </div>
@@ -338,7 +329,7 @@ export default function History() {
               initialData={{
                 ...editingExpense,
                 description: editingExpense.description ?? undefined,
-                category: categoryMap[editingExpense.category_id] || "",
+                category: editingExpense.categories?.name || "",
               }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingExpense(null)}

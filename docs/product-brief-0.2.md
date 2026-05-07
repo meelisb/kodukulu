@@ -1,6 +1,6 @@
 # Product Brief: Kodukulu
 
-*Last updated: 05 April 2026*
+*Last updated: 07 May 2026*
 
 ---
 
@@ -12,12 +12,12 @@ Estonian homeowners tracking household and vehicle running costs have no conveni
 
 Kodukulu is a personal home and vehicle expense management system that gives its owner a clear, searchable, and always-available record of household spending, purchase history, and maintenance activities. It serves three outcomes: 
 - understanding actual spending by category, vendor, and custom groupings including per-kilometre driving costs;
-- retrieving specific facts about past purchases;
+- retrieving specific facts about past purchases (purchase memory);
 - knowing when maintenance tasks were last performed and by whom.
 
 ## Target Users
 
-A single Estonian homeowner managing household and vehicle running costs across multiple categories (construction, garden, interior, tools, housekeeping, car). Currently built for a sole user. Preparing for future public release to other individual homeowners, each with isolated private data. No multi-user or family sharing in scope.
+A single Estonian homeowner family managing household and vehicle running costs across multiple categories (construction, garden, interior, tools, housekeeping, car). Multi-user for family sharing. Preparing for future public release to other individual homeowners, each with isolated private data. 
 
 ## Goals
 
@@ -28,10 +28,10 @@ A single Estonian homeowner managing household and vehicle running costs across 
 5. A maintenance diary records when recurring tasks were last done, by whom, and at what cost
 6. Digital receipts can be imported with minimal manual input
 7. All data remains private behind authentication and can be exported as CSV
+8. Multi-user access for family sharing
 
 ## Non-Goals
 
-- Multi-user access or family sharing
 - Full personal finance tracking — only home and vehicle categories are in scope
 - Native Android or iOS app — PWA only
 - Bulk historical data import
@@ -46,7 +46,7 @@ A single Estonian homeowner managing household and vehicle running costs across 
 4. Year-over-year category comparison is available and accurate across all years with data
 5. Car fuel cost, litres/100 km, and cost/km are calculated correctly from tagged cost and mileage data
 6. Hoolduspäevik shows the correct last-done date and provider for any maintenance type with at least one linked event
-7. A PDF receipt pre-fills vendor, date, amount, and fuel litres correctly without manual correction in at least 8 out of 10 cases
+7. A PDF or image receipt pre-fills vendor, date, amount, and fuel litres correctly without manual correction in at least 8 out of 10 cases
 8. CSV export contains exactly the rows matching the active filter selection and opens correctly in Excel with Estonian locale
 9. App is installable as a PWA on Android and accessible via home screen icon
 10. All user data is protected by row-level security; no user can see or modify another user's records
@@ -58,7 +58,7 @@ A single Estonian homeowner managing household and vehicle running costs across 
 - Free hosting tier — no recurring infrastructure costs
 - Authentication required — Supabase Auth with email/password minimum; RLS on all tables
 - Lovable as primary build environment
-- Gemini 2.5 Flash via Lovable AI Gateway for receipt parsing
+- Gemini 2.5 Flash for receipt parsing
 - Separate development and production Supabase projects
 
 ## Design Principles
@@ -73,4 +73,4 @@ A single Estonian homeowner managing household and vehicle running costs across 
 
 ## Tech Stack
 
-React, Supabase, Vercel, Lovable. Supabase Auth for authentication and row-level security. PWA manifest for Android home screen installation. Gemini 2.5 Flash for receipt OCR via Lovable AI Gateway.
+React, Supabase, Vercel, Claude Code. Supabase Auth for authentication and row-level security. PWA manifest for Android home screen installation. Gemini 2.5 Flash for receipt OCR via Lovable AI Gateway.

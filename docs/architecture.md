@@ -2,6 +2,21 @@
 
 *Last updated: 06 April 2026*
 
+## Contents
+
+- [Tech Stack](#tech-stack)
+- [Data Model](#data-model)
+  - [Current schema (production)](#current-schema-production)
+  - [Target schema (Iteration 2 migration)](#target-schema-iteration-2-migration)
+  - [Schema migration plan: text category → FK](#schema-migration-plan-text-category--fk)
+- [Navigation & Routing](#navigation--routing)
+- [Component Structure](#component-structure)
+- [Styling Conventions](#styling-conventions)
+- [Auth Strategy](#auth-strategy)
+- [Deployment Topology](#deployment-topology)
+- [S-02: Vendor Breakdown in Kokkuvõte (next feature)](#s-02-vendor-breakdown-in-kokkuvõte-next-feature)
+- [Non-Negotiable Rules](#non-negotiable-rules)
+
 ---
 
 ## Tech Stack

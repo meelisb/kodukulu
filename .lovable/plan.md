@@ -1,54 +1,16 @@
+## Kasuta icon-192 favicon'ina
 
+Manifest juba viitab `icon-192.png` ja `icon-512.png` ikoonidele PWA jaoks — see osa on korras ja jääb muutmata.
 
-## Vendor breakdown on Kokkuvõte
+Brauseri favicon viidet `index.html`-is praegu pole, seega brauser laeb vaikimisi vana `/favicon.ico` faili. Lisame `<head>` sektsiooni:
 
-### Approach
-
-Make each category row expandable using Collapsible. Clicking a category row toggles a vendor breakdown beneath it, showing vendors sorted by amount descending.
-
-### Changes
-
-**`src/pages/Summary.tsx`**
-
-- Import `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent` from `@/components/ui/collapsible`
-- Import `ChevronRight` from lucide-react and `useMemo` from React
-- Compute a `vendorBreakdown` map: for each category, group expenses by vendor, sum amounts, sort descending
-- Replace the static `<TableRow>` per category with a `<Collapsible>` wrapper:
-  - The category row becomes `<CollapsibleTrigger>` — shows category name, total, and a chevron icon that rotates on open
-  - `<CollapsibleContent>` renders indented sub-rows for each vendor with their subtotal
-- Categories with total 0 remain static (no expand)
-- Grand total footer row unchanged
-
-### Layout
-
-```text
-| ▸ Auto                    | 1 031.60 |
-|   Circle K                |   540.20 |  ← expanded
-|   Terminal                |   312.50 |
-|   Olerex                  |   178.90 |
-| ▸ Ehitus                  | 2 450.00 |
-| Kokku                     | 5 231.60 |
+```html
+<link rel="icon" type="image/png" href="/icon-192.png" />
 ```
 
-### Technical details
+Kustutame ka `public/favicon.ico` faili, et brauserid ei laeks enam vana ikooni vaikimisi `/favicon.ico` päringuga.
 
-- Vendor breakdown computed via `useMemo`:
-  ```typescript
-  const vendorBreakdown = useMemo(() => {
-    const map: Record<string, { vendor: string; total: number }[]> = {};
-    CATEGORIES.forEach(cat => {
-      const groups: Record<string, number> = {};
-      expenses.filter(e => e.category === cat).forEach(e => {
-        groups[e.vendor] = (groups[e.vendor] || 0) + Number(e.amount);
-      });
-      map[cat] = Object.entries(groups)
-        .map(([vendor, total]) => ({ vendor, total }))
-        .sort((a, b) => b.total - a.total);
-    });
-    return map;
-  }, [expenses]);
-  ```
-- Use `<Collapsible>` per category row instead of Accordion to keep table structure simple
-- Chevron rotates via `data-[state=open]:rotate-90` transition
-- No backend changes — uses existing expense data
+### Märkused
 
+- 192×192 PNG on favicon'ina suurem kui vaja, aga brauser skaleerib selle ja see on visuaalselt korrektne. Kui hiljem soovid teravamat väikest ikooni, saan genereerida eraldi 32×32 või 48×48 `favicon.png` faili olemasoleva 192-st.
+- Juba paigaldatud PWA kasutajatel võib vana ikoon vahemällu jääda — uuendus jõuab pärale, kui brauser/OS ikoonid värskendab.

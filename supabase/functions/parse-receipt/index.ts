@@ -34,7 +34,8 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: "google/gemini-3.8-flash",
-        max_tokens: 1024,
+        // Reasoning models can spend part of the budget on thinking; 1024 truncated the JSON.
+        max_tokens: 4096,
         messages: [
           {
             role: "user",
@@ -56,7 +57,9 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("AI Gateway error:", response.status, errorText);
-      throw new Error(`AI Gateway error: ${response.status}`);
+      if (response.status === 429) throw new Error("Liiga palju päringuid, proovi hetke pärast uuesti");
+      if (response.status === 402) throw new Error("AI krediit on otsas (Lovable → Settings → Usage)");
+      throw new Error(`AI Gateway error: ${response.status} ${errorText.slice(0, 200)}`);
     }
 
     const data = await response.json();
@@ -66,10 +69,16 @@ serve(async (req) => {
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.error("Raw response:", responseText);
-      throw new Error("Could not parse JSON from AI response");
+      throw new Error("AI ei tagastanud loetavat vastust, proovi selgemat pilti");
     }
 
-    const parsedData = JSON.parse(jsonMatch[0]);
+    let parsedData;
+    try {
+      parsedData = JSON.parse(jsonMatch[0]);
+    } catch {
+      console.error("Invalid JSON from model:", responseText);
+      throw new Error("AI vastus oli poolik, proovi uuesti");
+    }
 
     return new Response(JSON.stringify(parsedData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

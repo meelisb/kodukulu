@@ -10,6 +10,31 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Only logged-in users may spend AI credits. The public "anon" key is embedded in the
+  // app's JavaScript, so a valid JWT alone is not enough: ask the auth server whether the
+  // bearer token belongs to a real user (the anon key is rejected there).
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  let authorized = false;
+  if (token && supabaseUrl && anonKey) {
+    try {
+      const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
+      });
+      authorized = userRes.ok;
+    } catch (e) {
+      console.error("auth check failed:", e);
+    }
+  }
+  if (!authorized) {
+    return new Response(JSON.stringify({ error: "Palun logi sisse uuesti" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

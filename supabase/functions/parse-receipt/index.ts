@@ -33,9 +33,7 @@ serve(async (req) => {
         "Authorization": `Bearer ${LOVABLE_API_KEY}`,
       },
       body: JSON.stringify({
-        // NOTE: Lovable reroutes this retired model to its replacement. Ask Lovable to
-        // "replace deprecated AI models" so the ID below becomes a current one.
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
         // Reasoning models can spend part of the budget on thinking; 1024 truncated the JSON.
         max_tokens: 4096,
         messages: [

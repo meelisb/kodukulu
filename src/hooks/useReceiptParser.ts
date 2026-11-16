@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { prepareReceiptFile } from "@/lib/prepareReceiptFile";
 
 export interface ParsedReceipt {
   date?: string;
@@ -10,44 +11,52 @@ export interface ParsedReceipt {
   category?: string | null;
 }
 
+export type ParseOutcome = { result: ParsedReceipt; error?: undefined } | { result: null; error: string };
+
+/** supabase-js hides the function's JSON error body inside error.context (a Response). */
+async function extractFunctionError(fnError: unknown): Promise<string> {
+  const ctx = (fnError as { context?: unknown })?.context;
+  if (ctx instanceof Response) {
+    try {
+      const body = await ctx.clone().json();
+      if (body?.error) return String(body.error);
+    } catch {
+      // not JSON
+    }
+    return `Server vastas veaga (${ctx.status})`;
+  }
+  return fnError instanceof Error ? fnError.message : "Võrguühendus ebaõnnestus";
+}
+
 export function useReceiptParser() {
   const [isParsing, setIsParsing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const parseReceipt = async (file: File): Promise<ParsedReceipt | null> => {
+  const parseReceipt = async (file: File): Promise<ParseOutcome> => {
     setIsParsing(true);
     setError(null);
 
-    try {
-      // Convert file to base64
-      const buffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(buffer);
-      let binary = "";
-      bytes.forEach((byte) => {
-        binary += String.fromCharCode(byte);
-      });
-      const fileBase64 = btoa(binary);
-
-      const { data, error: fnError } = await supabase.functions.invoke("parse-receipt", {
-        body: {
-          fileBase64,
-          mimeType: file.type,
-        },
-      });
-
-      if (fnError) {
-        throw new Error(fnError.message);
-      }
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      return data as ParsedReceipt;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Kviitungi analüüsimine ebaõnnestus";
+    const fail = (message: string): ParseOutcome => {
+      console.error("parseReceipt failed:", message);
       setError(message);
-      return null;
+      return { result: null, error: message };
+    };
+
+    try {
+      const body = await prepareReceiptFile(file);
+
+      const { data, error: fnError } = await supabase.functions.invoke("parse-receipt", { body });
+
+      if (fnError) return fail(await extractFunctionError(fnError));
+      if (data?.error) return fail(String(data.error));
+
+      const parsed = data as ParsedReceipt;
+      const hasAnything = parsed && (parsed.amount != null || parsed.vendor || parsed.date || parsed.description);
+      if (!hasAnything) return fail("Kviitungilt ei leitud andmeid. Proovi selgemat pilti või PDF-i.");
+
+      return { result: parsed };
+    } catch (err) {
+      return fail(err instanceof Error ? err.message : "Kviitungi analüüsimine ebaõnnestus");
     } finally {
       setIsParsing(false);
     }

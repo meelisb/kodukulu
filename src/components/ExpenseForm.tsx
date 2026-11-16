@@ -23,6 +23,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { AutocompleteInput } from "@/components/AutocompleteInput";
 import { useVendorSuggestions, useDescriptionSuggestions } from "@/hooks/useAutocompleteSuggestions";
 import { useReceiptParser } from "@/hooks/useReceiptParser";
+import { isSupportedReceipt } from "@/lib/prepareReceiptFile";
 import { toast } from "@/components/ui/sonner";
 
 export interface ExpenseFormData {
@@ -96,14 +97,14 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const validTypes = ["application/pdf", "image/jpeg", "image/png"];
-    if (!validTypes.includes(file.type)) {
-      toast.error("Toetatud on ainult PDF, JPG ja PNG failid");
+    if (!isSupportedReceipt(file)) {
+      toast.error("Toetatud on ainult PDF ja pildifailid (JPG, PNG, HEIC, WebP)");
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     toast.info("Kviitungi analüüsimine...");
-    const result = await parseReceipt(file);
+    const { result, error: parseError } = await parseReceipt(file);
 
     if (result) {
       if (result.date) {
@@ -129,7 +130,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
       }
       toast.success("Kviitung analüüsitud! Kontrolli ja täienda andmeid.");
     } else {
-      toast.error("Kviitungi analüüsimine ebaõnnestus");
+      toast.error(parseError ? `Kviitungi analüüsimine ebaõnnestus: ${parseError}` : "Kviitungi analüüsimine ebaõnnestus");
     }
 
     if (fileInputRef.current) {
@@ -174,7 +175,7 @@ export function ExpenseForm({ initialData, onSubmit, onCancel, isSubmitting }: E
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+          accept="application/pdf,image/*,.pdf,.heic,.heif"
           onChange={handleFileSelect}
           className="hidden"
           disabled={isParsing || isSubmitting}

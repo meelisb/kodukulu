@@ -28,8 +28,8 @@
 | Routing | React Router v6 | Declarative routes; URL-based navigation state (e.g. `?highlight=id`) |
 | Data fetching | TanStack Query v5 | Automatic cache invalidation on mutation; loading/error states without boilerplate |
 | Backend / DB | Supabase (PostgreSQL) | Managed Postgres with built-in Auth, RLS, and Edge Functions; free tier fits constraints |
-| Edge functions | Supabase Edge Functions (Deno) | Receipt OCR proxy; keeps Gemini API key off the client |
-| AI / OCR | Gemini 3.8 Flash via direct API | Receipt parsing; called server-side through `supabase/functions/parse-receipt`; opt-in only |
+| Edge functions | Supabase Edge Functions (Deno) | Receipt OCR proxy; keeps the AI gateway key off the client |
+| AI / OCR | Gemini 3.8 Flash via Lovable AI Gateway | Receipt parsing; called server-side through `supabase/functions/parse-receipt`; opt-in only |
 | Auth | Supabase Auth | Email/password and Google OAuth; session persistence and token refresh built in |
 | Component library | shadcn/ui + Radix UI | Unstyled accessible primitives; copy-in model means full control over styling |
 | Styling | Tailwind CSS v3 | Utility-first; consistent spacing and sizing via design tokens |
@@ -384,12 +384,12 @@ For Vercel — set in project dashboard per environment:
 - Production: prod Supabase URL and anon key
 - Preview: dev Supabase URL and anon key
 
-**Edge Function secrets** (set via Supabase dashboard, not Vercel):
+**Edge Function secrets** (auto-provisioned by Lovable Cloud, not Vercel):
 ```
-GEMINI_API_KEY=<key>
+LOVABLE_API_KEY=<key>
 ```
 
-The Gemini API key is never exposed to the browser. It lives only in the Edge Function runtime.
+The Lovable AI Gateway key is never exposed to the browser. It lives only in the Edge Function runtime.
 
 ---
 
@@ -447,7 +447,7 @@ These rules apply to every feature in every iteration. Do not deviate without ex
 
 6. **Two Supabase projects always** — dev and prod. Test data must never reach the production database.
 
-7. **No secrets in the repository** — Supabase keys go in Vercel environment variables. Gemini API key goes in Supabase Edge Function secrets. `.env.local` is gitignored.
+7. **No secrets in the repository** — Supabase keys go in Vercel environment variables. The Lovable AI Gateway key (`LOVABLE_API_KEY`) is auto-provisioned as an Edge Function secret. `.env.local` is gitignored.
 
 8. **`src/integrations/supabase/types.ts` must be regenerated after every schema change** — run `supabase gen types typescript --project-id <id> > src/integrations/supabase/types.ts`. Stale types cause silent runtime errors.
 

@@ -727,7 +727,7 @@ Priority: P2
 
 **Job Story:** When I have a digital receipt or a photo of a paper receipt, I want to upload it and have the expense form pre-filled automatically, so that I avoid manual data entry for routine purchases.
 
-**Notes:** Only available when receipt import is enabled in Seaded (see G-08). Supports PDF and image files (jpg, png). AI extraction via Gemini 2.5 Flash through a Supabase Edge Function — the file is sent to Google's API server-side; the client never holds the API key. Category is auto-set to Auto when fuel, car wash, or windshield fluid is detected. All pre-filled fields are editable before saving. Text extracted in all-caps is converted to sentence case.
+**Notes:** Only available when receipt import is enabled in Seaded (see G-08). Supports PDF and image files (jpg, png). AI extraction via Gemini 3.8 Flash through a Supabase Edge Function — the file is sent to Google's API server-side; the client never holds the API key. Category is auto-set to Auto when fuel, car wash, or windshield fluid is detected. All pre-filled fields are editable before saving. Text extracted in all-caps is converted to sentence case.
 
 **Acceptance Criteria:**
 

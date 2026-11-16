@@ -61,7 +61,7 @@ A household — typically a couple or family — managing home and vehicle runni
 - Authentication required from day one — Supabase Auth with email/password and Google OAuth; RLS on all tables
 - Household-scoped data model — all data belongs to a household, not an individual user
 - Claude Code (VS Code) as primary build environment; Lovable as optional design and prototyping tool
-- Gemini 2.5 Flash for receipt OCR via Supabase Edge Function — opt-in only, with disclosure
+- Gemini 3.8 Flash for receipt OCR via Supabase Edge Function — opt-in only, with disclosure
 - Separate development and production Supabase projects from day one
 
 ## Design Principles
@@ -77,4 +77,4 @@ A household — typically a couple or family — managing home and vehicle runni
 
 ## Tech Stack
 
-React + TypeScript, Supabase (database, auth, edge functions), Vercel (hosting + preview deployments), Claude Code in VS Code. Supabase Auth for authentication and row-level security. PWA manifest for Android home screen installation. Gemini 2.5 Flash for receipt OCR via Supabase Edge Function.
+React + TypeScript, Supabase (database, auth, edge functions), Vercel (hosting + preview deployments), Claude Code in VS Code. Supabase Auth for authentication and row-level security. PWA manifest for Android home screen installation. Gemini 3.8 Flash for receipt OCR via Supabase Edge Function.

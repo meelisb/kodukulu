@@ -29,7 +29,7 @@
 | Data fetching | TanStack Query v5 | Automatic cache invalidation on mutation; loading/error states without boilerplate |
 | Backend / DB | Supabase (PostgreSQL) | Managed Postgres with built-in Auth, RLS, and Edge Functions; free tier fits constraints |
 | Edge functions | Supabase Edge Functions (Deno) | Receipt OCR proxy; keeps Gemini API key off the client |
-| AI / OCR | Gemini 2.5 Flash via direct API | Receipt parsing; called server-side through `supabase/functions/parse-receipt`; opt-in only |
+| AI / OCR | Gemini 3.8 Flash via direct API | Receipt parsing; called server-side through `supabase/functions/parse-receipt`; opt-in only |
 | Auth | Supabase Auth | Email/password and Google OAuth; session persistence and token refresh built in |
 | Component library | shadcn/ui + Radix UI | Unstyled accessible primitives; copy-in model means full control over styling |
 | Styling | Tailwind CSS v3 | Utility-first; consistent spacing and sizing via design tokens |
